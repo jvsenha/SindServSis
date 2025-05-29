@@ -1,8 +1,80 @@
 package br.com.sindservferpa.SindServ.Entity;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.br.CPF;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-public class AssociadoEntity extends UserEntity{
+@Table(name = "associado")
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+public class AssociadoEntity extends UserEntity {
+
+
+    @Column(name = "matricula", unique = true, nullable = false)
+    @Size(max = 6, message = "A matricula deve ter no maximo 6 digitos, não colocar o digito")
+    @NotBlank
+    private String matricula;
+
+    @Column(name = "cpf", unique = true, nullable = false)
+    @CPF(message = "CPF invalido")
+    @NotBlank
+    private String cpf;
+
+    @Column(name = "Vinculo", nullable = false)
+    @NotBlank
+    private String vinculo;
+
+    @Column(name = "rg", unique = true, nullable = false)
+    @NotBlank
+    private String rg;
+
+    @NotBlank
+    private EnderecoEmbeddable endereco;
+
+    @Column(name = "estadoCivil", nullable = false)
+    @NotBlank
+    private String estadoCivil;
+
+
+    @Column(name = "conjugue")
+    private String conjugue;
+
+    @Column(name = "nomeDoPai", nullable = false)
+    @NotBlank
+    private String nomeDoPai;
+
+    @Column(name = "nomeDaMae", nullable = false)
+    @NotBlank
+    private String nomeDaMae;
+
+    @Column(name = "escolaridade", nullable = false)
+    @NotBlank
+    private String escolaridade;
+
+    @Column(name = "localDeTrabalho")
+    @NotBlank
+    private String localDeTrabalho;
+
+    @Column(name = "vinculoDeTrabalho")
+    @NotBlank
+    private String vinculoDeTrabalho;
+
+    @Column(name = "cargo")
+    @NotBlank
+    private String cargo;
+
+    @OneToMany(mappedBy = "associado", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DependenteEntity> dependentes = new ArrayList<>();
+
+
 
 }
