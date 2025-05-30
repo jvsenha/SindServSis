@@ -35,7 +35,6 @@ public class UserEntity {
 
     @NotBlank(message = "Senha é obrigatório")
     @Column( name="senha", nullable = false )
-    @Size(min = 8, max = 16,message = "A senha deve ter no minimo 8 e no maximo 16 caracteres ")
     private String senha;
 
     @NotBlank
