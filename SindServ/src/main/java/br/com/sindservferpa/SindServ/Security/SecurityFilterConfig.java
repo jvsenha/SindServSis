@@ -17,6 +17,7 @@ public class SecurityFilterConfig {
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/register/func",
+                                "/auth/register/assoc",
                                 "/public/**"
                         ).permitAll()
                         .anyRequest().authenticated() // As demais precisam de autenticação

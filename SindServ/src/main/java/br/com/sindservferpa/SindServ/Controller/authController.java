@@ -39,7 +39,17 @@ public class authController {
             authService.RegisterFunc(dto);
             return ResponseEntity.ok(dto);
         } catch (RuntimeException e) {
-            return  ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/register/assoc")
+    public ResponseEntity<?> registerAssoc(@RequestBody AssociadoDTO dto) {
+        try {
+            authService.RegisterAssoc(dto);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

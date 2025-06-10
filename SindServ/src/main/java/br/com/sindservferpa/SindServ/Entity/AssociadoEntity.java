@@ -1,6 +1,8 @@
 package br.com.sindservferpa.SindServ.Entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -37,8 +39,10 @@ public class AssociadoEntity extends UserEntity {
     @NotBlank
     private String rg;
 
-    @NotBlank
+    @Embedded
+    @Valid
     private EnderecoEmbeddable endereco;
+
 
     @Column(name = "estadoCivil", nullable = false)
     @NotBlank
@@ -73,6 +77,7 @@ public class AssociadoEntity extends UserEntity {
     private String cargo;
 
     @OneToMany(mappedBy = "associado", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<DependenteEntity> dependentes = new ArrayList<>();
 
 

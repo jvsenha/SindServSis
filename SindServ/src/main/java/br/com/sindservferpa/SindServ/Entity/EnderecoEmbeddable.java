@@ -3,8 +3,10 @@ package br.com.sindservferpa.SindServ.Entity;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Data;
 
 @Embeddable
+@Data
 public class EnderecoEmbeddable {
     @NotBlank(message = "Rua é obrigatória")
     private String rua;

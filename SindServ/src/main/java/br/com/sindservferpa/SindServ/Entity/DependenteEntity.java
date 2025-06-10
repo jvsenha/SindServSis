@@ -1,5 +1,6 @@
 package br.com.sindservferpa.SindServ.Entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -27,5 +28,6 @@ public class DependenteEntity {
 
     @ManyToOne
     @JoinColumn(name = "associado_id", nullable = false)
+    @JsonBackReference
     private AssociadoEntity associado;
 }

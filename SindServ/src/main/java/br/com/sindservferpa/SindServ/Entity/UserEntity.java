@@ -1,6 +1,7 @@
 package br.com.sindservferpa.SindServ.Entity;
 
 import br.com.sindservferpa.SindServ.Enum.Role;
+import br.com.sindservferpa.SindServ.Enum.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -37,9 +38,8 @@ public class UserEntity {
     @Column( name="senha", nullable = false )
     private String senha;
 
-    @NotBlank
-    @Column( name="status", nullable = false )
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @NotBlank(message = "Telefone é obrigatorio")
     @Column(name = "telefone", unique = true, nullable = false)

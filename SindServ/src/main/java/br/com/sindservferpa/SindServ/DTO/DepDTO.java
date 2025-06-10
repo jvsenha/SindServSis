@@ -7,5 +7,4 @@ import lombok.Data;
 public class DepDTO {
     private String nome;
     private String parentesco;
-    private AssociadoEntity associado;
 }
