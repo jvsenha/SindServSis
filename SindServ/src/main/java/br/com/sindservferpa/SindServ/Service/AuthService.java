@@ -1,15 +1,13 @@
 package br.com.sindservferpa.SindServ.Service;
 
-import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
-import br.com.sindservferpa.SindServ.DTO.DepDTO;
-import br.com.sindservferpa.SindServ.DTO.EnderecoDTO;
-import br.com.sindservferpa.SindServ.DTO.FuncDTO;
+import br.com.sindservferpa.SindServ.DTO.*;
 import br.com.sindservferpa.SindServ.Entity.*;
 import br.com.sindservferpa.SindServ.Enum.Role;
 import br.com.sindservferpa.SindServ.Enum.Status;
 import br.com.sindservferpa.SindServ.Repository.AssocRepository;
 import br.com.sindservferpa.SindServ.Repository.FuncRepository;
 import br.com.sindservferpa.SindServ.Repository.UserRepository;
+import br.com.sindservferpa.SindServ.Util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,16 +27,24 @@ public class AuthService {
     public AssocRepository assocRepository;
     @Autowired
     public PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    public UserEntity autenticar(String email, String senha) {
-        UserEntity user = userRepository.findByEmail(email)
+    public LoginResponse autenticar(LoginRequest loginRequest) {
+        UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        if (!passwordEncoder.matches(senha, user.getSenha())) {
+        if (!passwordEncoder.matches(loginRequest.getSenha(), user.getSenha())) {
             throw new RuntimeException("Senha inválida");
         }
 
-        return user;
+        if (user.getStatus() != Status.STATUS_ATIVO) {
+            throw new RuntimeException("Usuário inativo");
+        }
+
+        String token = jwtUtil.generateToken(user);
+
+        return new LoginResponse( token, user.getEmail(), user.getNome(), user.getRole().name(), user.getId());
     }
 
     public void RegisterFunc(FuncDTO dto){

@@ -3,7 +3,7 @@ package br.com.sindservferpa.SindServ.Controller;
 import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
 import br.com.sindservferpa.SindServ.DTO.FuncDTO;
 import br.com.sindservferpa.SindServ.DTO.LoginRequest;
-import br.com.sindservferpa.SindServ.Entity.UserEntity;
+import br.com.sindservferpa.SindServ.DTO.LoginResponse;
 import br.com.sindservferpa.SindServ.Service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/auth")
-public class authController {
+public class AuthController {
 
     @Autowired
     private AuthService authService;
@@ -26,7 +26,7 @@ public class authController {
     // retorna um ResponseEntity, que é todos os tipos de response http
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            UserEntity user = authService.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
+            LoginResponse user = authService.autenticar(loginRequest);
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(e.getMessage());

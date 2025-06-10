@@ -6,11 +6,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.br.CPF;
 
 
 @Entity
@@ -26,7 +24,7 @@ public class UserEntity {
     private long id;
 
     @NotBlank(message = "Nome é obrigatório")
-    @Column( name="nome", unique = true, nullable = false )
+    @Column( name="nome", nullable = false )
     private String nome;
 
     @Email
