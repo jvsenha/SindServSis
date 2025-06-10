@@ -100,7 +100,7 @@ public class AuthService {
         //atributos Func
         Assoc.setMatricula(dto.getMatricula());
         Assoc.setCpf(dto.getCpf());
-        Assoc.setVinculo(dto.getVinculo());
+        Assoc.setData(dto.getData());
         Assoc.setRg(dto.getRg());
         Assoc.setEndereco(end);
         Assoc.setEstadoCivil(dto.getEstadoCivil());
