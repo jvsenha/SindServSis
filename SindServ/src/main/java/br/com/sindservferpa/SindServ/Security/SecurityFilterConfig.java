@@ -23,6 +23,7 @@ public class SecurityFilterConfig {
                                 "/auth/login",
                                 "/auth/register/func",
                                 "/auth/register/assoc",
+                                "/auth/register/assoc/lote",
                                 "/public/**"
                         ).permitAll()
                         .anyRequest().authenticated() // As demais precisam de autenticação

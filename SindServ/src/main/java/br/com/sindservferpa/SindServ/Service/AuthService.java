@@ -130,4 +130,64 @@ public class AuthService {
         assocRepository.save(Assoc);
 
     }
+
+    public boolean registerAssocIfNotExists(AssociadoDTO dto) {
+        if (assocRepository.existsByEmail(dto.getEmail())) {
+            System.out.println("Email já existe: " + dto.getEmail());
+            return false;
+        }
+
+        AssociadoEntity assoc = new AssociadoEntity();
+
+        // Dados comuns
+        assoc.setNome(dto.getNome());
+        assoc.setEmail(dto.getEmail());
+        assoc.setSenha(passwordEncoder.encode(dto.getSenha()));
+        assoc.setStatus(Status.STATUS_ATIVO);
+        assoc.setRole(Role.ROLE_ASC);
+        assoc.setTelefone(dto.getTelefone());
+
+        // Endereço
+        EnderecoDTO endDto = dto.getEndereco();
+        EnderecoEmbeddable endereco = new EnderecoEmbeddable();
+        endereco.setRua(endDto.getRua());
+        endereco.setNumero(endDto.getNumero());
+        endereco.setComplemento(endDto.getComplemento());
+        endereco.setBairro(endDto.getBairro());
+        endereco.setCidade(endDto.getCidade());
+        endereco.setEstado(endDto.getEstado());
+        endereco.setCep(endDto.getCep());
+        assoc.setEndereco(endereco);
+
+        // Dados pessoais
+        assoc.setMatricula(dto.getMatricula());
+        assoc.setCpf(dto.getCpf());
+        assoc.setData(dto.getData());
+        assoc.setRg(dto.getRg());
+        assoc.setEstadoCivil(dto.getEstadoCivil());
+        assoc.setConjugue(dto.getConjugue());
+        assoc.setNomeDoPai(dto.getNomeDoPai());
+        assoc.setNomeDaMae(dto.getNomeDaMae());
+        assoc.setEscolaridade(dto.getEscolaridade());
+        assoc.setLocalDeTrabalho(dto.getLocalDeTrabalho());
+        assoc.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
+        assoc.setCargo(dto.getCargo());
+
+        // Dependentes
+        List<DependenteEntity> dependentes = new ArrayList<>();
+        if (dto.getDependentes() != null) {
+            for (DepDTO depDto : dto.getDependentes()) {
+                DependenteEntity dep = new DependenteEntity();
+                dep.setNome(depDto.getNome());
+                dep.setParentesco(depDto.getParentesco());
+                dep.setAssociado(assoc); // relação reversa
+                dependentes.add(dep);
+            }
+        }
+
+        assoc.setDependentes(dependentes);
+
+        assocRepository.save(assoc);
+        return true;
+    }
 }
