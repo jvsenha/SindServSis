@@ -1,6 +1,7 @@
 package br.com.sindservferpa.SindServ.Service;
 
 import br.com.sindservferpa.SindServ.DTO.DepDTO;
+import br.com.sindservferpa.SindServ.DTO.DependenteResponseDTO;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Enum.Status;
@@ -38,7 +39,7 @@ public class DependenteService {
         return response;
     }
 
-    public HashMap<String, String> deletar(Long id) {
+    public HashMap<String, String> deletarDependente(Long id) {
         HashMap<String, String> response = new HashMap<>();
         dependenteRepository.deleteById(id);
         response.put("mensagem", "Dependente deletado com sucesso");
@@ -65,11 +66,23 @@ public class DependenteService {
                 .orElseThrow(() -> new RuntimeException("Dependente não encontrado."));
     }
 
-    public List<DependenteEntity> listarDependente() {
-        return dependenteRepository.findAll();
+    public List<DependenteResponseDTO> listarDependente() {
+        List<DependenteEntity> dependente = dependenteRepository.findAll();
+
+        return dependente.stream().map(d -> {
+            DependenteResponseDTO dto = new DependenteResponseDTO();
+            dto.setId(d.getId());
+            dto.setData(d.getData());
+            dto.setNome(d.getNome());
+            dto.setNomeAssociado(d.getAssociado().getNome());
+            dto.setParentesco(d.getParentesco());
+            dto.setStatus(d.getStatus());
+
+            return dto;
+        }).toList();
     }
 
-    public HashMap<String, String> AlterarDependente(Long id, DepDTO dto){
+    public HashMap<String, String> alterarDependente(Long id, DepDTO dto){
         HashMap<String, String> response = new HashMap<>();
         DependenteEntity dependente = BuscarDependente(id);
         AssociadoEntity associado = assocService.BuscarAssoc(dto.getAssociadoId());
