@@ -1,10 +1,11 @@
 package br.com.sindservferpa.SindServ.Controller;
 
-import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
-import br.com.sindservferpa.SindServ.DTO.FuncDTO;
-import br.com.sindservferpa.SindServ.DTO.LoginRequest;
-import br.com.sindservferpa.SindServ.DTO.LoginResponse;
+import br.com.sindservferpa.SindServ.DTO.*;
+import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
+import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
 import br.com.sindservferpa.SindServ.Service.AuthService;
+import br.com.sindservferpa.SindServ.Service.BeneficiarioService;
+import br.com.sindservferpa.SindServ.Service.CadastroAssociadoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +25,14 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    public BeneficiarioService beneficiarioService;
+
+    @Autowired
+    public DependenteRepository dependenteRepository;
+
+    @Autowired
+    public CadastroAssociadoService cadastroAssociadoService;
 
     @PostMapping("/login")// rota para login
     //Função de login recebe o email e a senha que vem do DTO de login
@@ -49,12 +58,12 @@ public class AuthController {
     }
 
     @PostMapping("/register/assoc")
-    public ResponseEntity<?> registerAssoc(@RequestBody AssociadoDTO dto) {
+    public ResponseEntity<?> registerAssoc(@RequestBody RegistroAssociadoCompletoDTO dto) {
         try {
-            authService.RegisterAssoc(dto);
-            return ResponseEntity.ok(dto);
+            AssociadoEntity assoc = cadastroAssociadoService.cadastrarTudo(dto);
+            return ResponseEntity.ok(assoc);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
         }
     }
 

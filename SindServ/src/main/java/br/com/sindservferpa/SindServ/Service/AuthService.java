@@ -1,193 +1,194 @@
-package br.com.sindservferpa.SindServ.Service;
+    package br.com.sindservferpa.SindServ.Service;
 
-import br.com.sindservferpa.SindServ.DTO.*;
-import br.com.sindservferpa.SindServ.Entity.*;
-import br.com.sindservferpa.SindServ.Enum.Role;
-import br.com.sindservferpa.SindServ.Enum.Status;
-import br.com.sindservferpa.SindServ.Repository.AssocRepository;
-import br.com.sindservferpa.SindServ.Repository.FuncRepository;
-import br.com.sindservferpa.SindServ.Repository.UserRepository;
-import br.com.sindservferpa.SindServ.Util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+    import br.com.sindservferpa.SindServ.DTO.*;
+    import br.com.sindservferpa.SindServ.Entity.*;
+    import br.com.sindservferpa.SindServ.Enum.Role;
+    import br.com.sindservferpa.SindServ.Enum.Status;
+    import br.com.sindservferpa.SindServ.Repository.AssocRepository;
+    import br.com.sindservferpa.SindServ.Repository.FuncRepository;
+    import br.com.sindservferpa.SindServ.Repository.UserRepository;
+    import br.com.sindservferpa.SindServ.Util.JwtUtil;
+    import org.springframework.beans.factory.annotation.Autowired;
+    import org.springframework.security.crypto.password.PasswordEncoder;
+    import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+    import java.util.ArrayList;
+    import java.util.List;
 
-@Service
-public class AuthService {
-
-
-    @Autowired
-    public UserRepository userRepository;
-    @Autowired
-    public FuncRepository funcRepository;
-    @Autowired
-    public AssocRepository assocRepository;
-    @Autowired
-    public PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    public LoginResponse autenticar(LoginRequest loginRequest) {
-        UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        if (!passwordEncoder.matches(loginRequest.getSenha(), user.getSenha())) {
-            throw new RuntimeException("Senha inválida");
-        }
-
-        if (user.getStatus() != Status.STATUS_ATIVO) {
-            throw new RuntimeException("Usuário inativo");
-        }
-
-        String token = jwtUtil.generateToken(user);
-
-        return new LoginResponse( token, user.getEmail(), user.getNome(), user.getRole().name(), user.getId());
-    }
-
-    public void RegisterFunc(FuncDTO dto){
-        if(funcRepository.existsByEmail(dto.getEmail())){
-            throw new RuntimeException("Email já esta cadastrado");
-        }
-        FuncEntity func = new FuncEntity();
-
-        //atributos usuario em geral
-        func.setNome(dto.getNome());
-        func.setEmail(dto.getEmail());
-        func.setSenha(passwordEncoder.encode(dto.getSenha()));
-        func.setStatus(Status.STATUS_ATIVO);
-        func.setRole(Role.ROLE_FUNC);
-        func.setTelefone(dto.getTelefone());
-
-        //atributos Func
-        func.setFuncao(dto.getFuncao());
-        func.setSetor(dto.getSetor());
-        func.setTipoContrato(dto.getTipoContrato());
-
-        funcRepository.save(func);
-
-    }
-
-    public void RegisterAssoc(AssociadoDTO dto){
-        if(assocRepository.existsByEmail(dto.getEmail())){
-            throw new RuntimeException("Email já esta cadastrado");
-        }
-        AssociadoEntity Assoc = new AssociadoEntity();
+    @Service
+    public class AuthService {
 
 
-        //atributos usuario em geral
-        Assoc.setNome(dto.getNome());
-        Assoc.setEmail(dto.getEmail());
-        Assoc.setSenha(passwordEncoder.encode(dto.getSenha()));
-        Assoc.setStatus(Status.STATUS_ATIVO);
-        Assoc.setRole(Role.ROLE_ASC);
-        Assoc.setTelefone(dto.getTelefone());
+        @Autowired
+        public UserRepository userRepository;
+        @Autowired
+        public FuncRepository funcRepository;
+        @Autowired
+        public AssocRepository assocRepository;
+        @Autowired
+        public PasswordEncoder passwordEncoder;
+        @Autowired
+        private JwtUtil jwtUtil;
 
-        EnderecoDTO endDto = dto.getEndereco();
-        EnderecoEmbeddable end = new EnderecoEmbeddable();
-        //Atributos endereço
-        end.setRua(endDto.getRua());
-        end.setNumero(endDto.getNumero());
-        end.setComplemento(endDto.getComplemento());
-        end.setBairro(endDto.getBairro());
-        end.setCidade(endDto.getCidade());
-        end.setEstado(endDto.getEstado());
-        end.setEstado(endDto.getEstado());
-        end.setCep(endDto.getCep());
+        public LoginResponse autenticar(LoginRequest loginRequest) {
+            UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        //atributos Func
-        Assoc.setMatricula(dto.getMatricula());
-        Assoc.setCpf(dto.getCpf());
-        Assoc.setData(dto.getData());
-        Assoc.setRg(dto.getRg());
-        Assoc.setEndereco(end);
-        Assoc.setEstadoCivil(dto.getEstadoCivil());
-        Assoc.setConjugue(dto.getConjugue());
-        Assoc.setNomeDoPai(dto.getNomeDoPai());
-        Assoc.setNomeDaMae(dto.getNomeDaMae());
-        Assoc.setEscolaridade(dto.getEscolaridade());
-        Assoc.setLocalDeTrabalho(dto.getLocalDeTrabalho());
-        Assoc.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
-        Assoc.setCargo(dto.getCargo());
-
-
-        List<DependenteEntity> dependentes = new ArrayList<>();
-        if (dto.getDependentes() != null) {
-            for (DepDTO depDto : dto.getDependentes()) {
-                DependenteEntity dep = new DependenteEntity();
-                dep.setNome(depDto.getNome());
-                dep.setParentesco(depDto.getParentesco());
-                dep.setAssociado(Assoc); // define a relação reversa
-                dependentes.add(dep);
+            if (!passwordEncoder.matches(loginRequest.getSenha(), user.getSenha())) {
+                throw new RuntimeException("Senha inválida");
             }
-        }
 
-        Assoc.setDependentes(dependentes);
-
-
-        assocRepository.save(Assoc);
-
-    }
-
-    public boolean registerAssocIfNotExists(AssociadoDTO dto) {
-        if (assocRepository.existsByEmail(dto.getEmail())) {
-            System.out.println("Email já existe: " + dto.getEmail());
-            return false;
-        }
-
-        AssociadoEntity assoc = new AssociadoEntity();
-
-        // Dados comuns
-        assoc.setNome(dto.getNome());
-        assoc.setEmail(dto.getEmail());
-        assoc.setSenha(passwordEncoder.encode(dto.getSenha()));
-        assoc.setStatus(Status.STATUS_ATIVO);
-        assoc.setRole(Role.ROLE_ASC);
-        assoc.setTelefone(dto.getTelefone());
-
-        // Endereço
-        EnderecoDTO endDto = dto.getEndereco();
-        EnderecoEmbeddable endereco = new EnderecoEmbeddable();
-        endereco.setRua(endDto.getRua());
-        endereco.setNumero(endDto.getNumero());
-        endereco.setComplemento(endDto.getComplemento());
-        endereco.setBairro(endDto.getBairro());
-        endereco.setCidade(endDto.getCidade());
-        endereco.setEstado(endDto.getEstado());
-        endereco.setCep(endDto.getCep());
-        assoc.setEndereco(endereco);
-
-        // Dados pessoais
-        assoc.setMatricula(dto.getMatricula());
-        assoc.setCpf(dto.getCpf());
-        assoc.setData(dto.getData());
-        assoc.setRg(dto.getRg());
-        assoc.setEstadoCivil(dto.getEstadoCivil());
-        assoc.setConjugue(dto.getConjugue());
-        assoc.setNomeDoPai(dto.getNomeDoPai());
-        assoc.setNomeDaMae(dto.getNomeDaMae());
-        assoc.setEscolaridade(dto.getEscolaridade());
-        assoc.setLocalDeTrabalho(dto.getLocalDeTrabalho());
-        assoc.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
-        assoc.setCargo(dto.getCargo());
-
-        // Dependentes
-        List<DependenteEntity> dependentes = new ArrayList<>();
-        if (dto.getDependentes() != null) {
-            for (DepDTO depDto : dto.getDependentes()) {
-                DependenteEntity dep = new DependenteEntity();
-                dep.setNome(depDto.getNome());
-                dep.setParentesco(depDto.getParentesco());
-                dep.setAssociado(assoc); // relação reversa
-                dependentes.add(dep);
+            if (user.getStatus() != Status.STATUS_ATIVO) {
+                throw new RuntimeException("Usuário inativo");
             }
+
+            String token = jwtUtil.generateToken(user);
+
+            return new LoginResponse( token, user.getEmail(), user.getNome(), user.getRole().name(), user.getId());
         }
 
-        assoc.setDependentes(dependentes);
+        public void RegisterFunc(FuncDTO dto){
+            if(funcRepository.existsByEmail(dto.getEmail())){
+                throw new RuntimeException("Email já esta cadastrado");
+            }
+            FuncEntity func = new FuncEntity();
 
-        assocRepository.save(assoc);
-        return true;
+            //atributos usuario em geral
+            func.setNome(dto.getNome());
+            func.setEmail(dto.getEmail());
+            func.setSenha(passwordEncoder.encode(dto.getSenha()));
+            func.setStatus(Status.STATUS_ATIVO);
+            func.setRole(Role.ROLE_FUNC);
+            func.setTelefone(dto.getTelefone());
+
+            //atributos Func
+            func.setFuncao(dto.getFuncao());
+            func.setSetor(dto.getSetor());
+            func.setTipoContrato(dto.getTipoContrato());
+
+            funcRepository.save(func);
+
+        }
+
+        public AssociadoEntity RegisterAssoc(AssociadoDTO dto) {
+            if (assocRepository.existsByEmail(dto.getEmail())) {
+                throw new RuntimeException("Email já está cadastrado");
+            }
+
+            AssociadoEntity Assoc = new AssociadoEntity();
+
+            // Atributos de usuário
+            Assoc.setNome(dto.getNome());
+            Assoc.setEmail(dto.getEmail());
+            Assoc.setSenha(passwordEncoder.encode(dto.getSenha()));
+            Assoc.setStatus(Status.STATUS_ATIVO);
+            Assoc.setRole(Role.ROLE_ASC);
+            Assoc.setTelefone(dto.getTelefone());
+
+            // Atributos de endereço
+            EnderecoDTO endDto = dto.getEndereco();
+            EnderecoEmbeddable end = new EnderecoEmbeddable();
+            end.setRua(endDto.getRua());
+            end.setNumero(endDto.getNumero());
+            end.setComplemento(endDto.getComplemento());
+            end.setBairro(endDto.getBairro());
+            end.setCidade(endDto.getCidade());
+            end.setEstado(endDto.getEstado()); // <-- Corrigido: linha única
+            end.setCep(endDto.getCep());
+
+            // Atributos do associado
+            Assoc.setMatricula(dto.getMatricula());
+            Assoc.setCpf(dto.getCpf());
+            Assoc.setData(dto.getData());
+            Assoc.setRg(dto.getRg());
+            Assoc.setEndereco(end);
+            Assoc.setEstadoCivil(dto.getEstadoCivil());
+            Assoc.setConjugue(dto.getConjugue());
+            Assoc.setNomeDoPai(dto.getNomeDoPai());
+            Assoc.setNomeDaMae(dto.getNomeDaMae());
+            Assoc.setEscolaridade(dto.getEscolaridade());
+            Assoc.setLocalDeTrabalho(dto.getLocalDeTrabalho());
+            Assoc.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
+            Assoc.setCargo(dto.getCargo());
+
+            // Dependentes
+            List<DependenteEntity> dependentes = new ArrayList<>();
+            if (dto.getDependentes() != null) {
+                for (DepDTO depDto : dto.getDependentes()) {
+                    DependenteEntity dep = new DependenteEntity();
+                    dep.setNome(depDto.getNome());
+                    dep.setParentesco(depDto.getParentesco());
+                    dep.setData(depDto.getData()); // <-- Adicionado corretamente
+                    dep.setAssociado(Assoc); // Define a relação reversa
+                    dependentes.add(dep);
+                }
+            }
+
+            Assoc.setDependentes(dependentes);
+
+            // Persiste no banco (com dependentes, se estiver usando cascade)
+            Assoc = assocRepository.save(Assoc); // salva e atualiza com id gerado
+
+            return Assoc;
+        }
+
+        public boolean registerAssocIfNotExists(AssociadoDTO dto) {
+            if (assocRepository.existsByEmail(dto.getEmail())) {
+                System.out.println("Email já existe: " + dto.getEmail());
+                return false;
+            }
+
+            AssociadoEntity assoc = new AssociadoEntity();
+
+            // Dados comuns
+            assoc.setNome(dto.getNome());
+            assoc.setEmail(dto.getEmail());
+            assoc.setSenha(passwordEncoder.encode(dto.getSenha()));
+            assoc.setStatus(Status.STATUS_ATIVO);
+            assoc.setRole(Role.ROLE_ASC);
+            assoc.setTelefone(dto.getTelefone());
+
+            // Endereço
+            EnderecoDTO endDto = dto.getEndereco();
+            EnderecoEmbeddable endereco = new EnderecoEmbeddable();
+            endereco.setRua(endDto.getRua());
+            endereco.setNumero(endDto.getNumero());
+            endereco.setComplemento(endDto.getComplemento());
+            endereco.setBairro(endDto.getBairro());
+            endereco.setCidade(endDto.getCidade());
+            endereco.setEstado(endDto.getEstado());
+            endereco.setCep(endDto.getCep());
+            assoc.setEndereco(endereco);
+
+            // Dados pessoais
+            assoc.setMatricula(dto.getMatricula());
+            assoc.setCpf(dto.getCpf());
+            assoc.setData(dto.getData());
+            assoc.setRg(dto.getRg());
+            assoc.setEstadoCivil(dto.getEstadoCivil());
+            assoc.setConjugue(dto.getConjugue());
+            assoc.setNomeDoPai(dto.getNomeDoPai());
+            assoc.setNomeDaMae(dto.getNomeDaMae());
+            assoc.setEscolaridade(dto.getEscolaridade());
+            assoc.setLocalDeTrabalho(dto.getLocalDeTrabalho());
+            assoc.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
+            assoc.setCargo(dto.getCargo());
+
+            // Dependentes
+            List<DependenteEntity> dependentes = new ArrayList<>();
+            if (dto.getDependentes() != null) {
+                for (DepDTO depDto : dto.getDependentes()) {
+                    DependenteEntity dep = new DependenteEntity();
+                    dep.setNome(depDto.getNome());
+                    dep.setParentesco(depDto.getParentesco());
+                    dep.setAssociado(assoc); // relação reversa
+                    dependentes.add(dep);
+                }
+            }
+
+            assoc.setDependentes(dependentes);
+
+            assocRepository.save(assoc);
+            return true;
+        }
     }
-}

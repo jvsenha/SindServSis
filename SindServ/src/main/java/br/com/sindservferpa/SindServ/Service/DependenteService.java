@@ -97,4 +97,18 @@ public class DependenteService {
         response.put("mensagem", "Dependente alterado com sucesso");
         return response;
     }
+
+    public DependenteEntity registerDependenteRetorno(DepDTO dto) {
+        DependenteEntity dependente = new DependenteEntity();
+
+        AssociadoEntity associado = assocService.BuscarAssoc(dto.getAssociadoId());
+
+        dependente.setNome(dto.getNome());
+        dependente.setData(dto.getData());
+        dependente.setParentesco(dto.getParentesco());
+        dependente.setAssociado(associado);
+        dependente.setStatus(Status.STATUS_ATIVO);
+
+        return dependenteRepository.saveAndFlush(dependente);
+    }
 }

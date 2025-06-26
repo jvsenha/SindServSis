@@ -1,9 +1,12 @@
 package br.com.sindservferpa.SindServ.Controller;
 
 import br.com.sindservferpa.SindServ.Annotation.RequireRole;
+import br.com.sindservferpa.SindServ.DTO.BeneficiarioComDependenteDTO;
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioDTO;
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioResponseDTO;
+import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Enum.Role;
+import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
 import br.com.sindservferpa.SindServ.Service.BeneficiarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +21,25 @@ public class BeneficiarioController {
 
     @Autowired
     public BeneficiarioService beneficiarioService;
+@Autowired
+    public DependenteRepository dependenteRepository;
+
 
     @PostMapping("/register/beneficiario")
-    public ResponseEntity<?> registerBeneficiario(@RequestBody BeneficiarioDTO dto) {
+    public ResponseEntity<?> registerBeneficiario(@RequestBody BeneficiarioComDependenteDTO dados) {
         try {
-            beneficiarioService.registerBeneficiario(dto);
-            return ResponseEntity.ok(dto);
+            Long associadoId = dados.getBeneficiario().getAssociadoId();
+            String nome = dados.getNomeDependente();
+
+            if(dados.getNomeDependente()!= null) {
+                DependenteEntity dependente = dependenteRepository.findByNomeAndAssociadoId(nome, associadoId)
+                        .orElseThrow(() -> new RuntimeException("Dependente não encontrado"));
+            dados.getBeneficiario().setDependenteId(dependente.getId());
+            }
+
+            beneficiarioService.registerBeneficiario(dados.getBeneficiario(), null); // null pois já existe
+
+            return ResponseEntity.ok(dados);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

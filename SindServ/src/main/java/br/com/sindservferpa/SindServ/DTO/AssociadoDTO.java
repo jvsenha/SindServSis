@@ -10,8 +10,10 @@ import java.util.List;
 public class AssociadoDTO extends UserDTO {
     private String matricula;
     private String cpf;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate data;
+
     private String rg;
     private EnderecoDTO endereco;
     private String estadoCivil;
@@ -23,4 +25,5 @@ public class AssociadoDTO extends UserDTO {
     private String vinculoDeTrabalho;
     private String cargo;
     private List<DepDTO> dependentes;
+    private Boolean plano;
 }

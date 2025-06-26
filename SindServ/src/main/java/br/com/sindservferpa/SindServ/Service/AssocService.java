@@ -4,10 +4,12 @@ import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
 import br.com.sindservferpa.SindServ.DTO.DepDTO;
 import br.com.sindservferpa.SindServ.DTO.EnderecoDTO;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
+import br.com.sindservferpa.SindServ.Entity.BeneficiarioEntity;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Entity.EnderecoEmbeddable;
 import br.com.sindservferpa.SindServ.Enum.Status;
 import br.com.sindservferpa.SindServ.Repository.AssocRepository;
+import br.com.sindservferpa.SindServ.Repository.BeneficiarioRepository;
 import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
 import br.com.sindservferpa.SindServ.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,22 +36,27 @@ public class AssocService {
     @Autowired
     public PasswordEncoder passwordEncoder;
 
+    @Autowired
+    public BeneficiarioRepository beneficiarioRepository;
+
     @Transactional
     public HashMap<String, String> deletarAssociado(Long id) {
         HashMap<String, String> response = new HashMap<>();
 
-        AssociadoEntity associado = BuscarAssoc(id);
+        AssociadoEntity associado = BuscarAssoc(id); // assume que lança exceção se não encontrar
 
-        dependenteRepository.deleteById(associado.getId());
+        // 1. Deletar beneficiários associados a esse associado
+        List<BeneficiarioEntity> beneficiarios = beneficiarioRepository.findByAssociadoId(id);
+        beneficiarioRepository.deleteAll(beneficiarios);
 
-        // 2. Deleta o associado
+        // 2. Deletar dependentes associados a esse associado
+        List<DependenteEntity> dependentes = dependenteRepository.findByAssociadoId(id);
+        dependenteRepository.deleteAll(dependentes);
+
+        // 3. Deletar o associado (UserEntity herdado será excluído também, se for o mesmo ID)
         assocRepository.delete(associado);
 
-        // 3. Deleta o usuário (mesmo ID do associado)
-        userRepository.deleteById(id);
-
-        // 4. Mensagem de sucesso
-        response.put("mensagem", "Associado, dependentes e usuário deletados com sucesso.");
+        response.put("mensagem", "Associado, beneficiários e dependentes deletados com sucesso.");
         return response;
     }
 

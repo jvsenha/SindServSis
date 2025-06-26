@@ -2,6 +2,7 @@ package br.com.sindservferpa.SindServ.Service;
 
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioDTO;
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioResponseDTO;
+import br.com.sindservferpa.SindServ.DTO.DepDTO;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Entity.BeneficiarioEntity;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
@@ -31,7 +32,11 @@ public class BeneficiarioService {
     @Autowired
     private DependenteRepository dependenteRepository;
 
-    public HashMap<String, String> registerBeneficiario(BeneficiarioDTO dto) {
+    @Autowired
+    public DependenteService dependenteService;
+
+
+    public HashMap<String, String> registerBeneficiario(BeneficiarioDTO dto, DepDTO depDto) {
         HashMap<String, String> response = new HashMap<>();
 
         BeneficiarioEntity beneficiario = new BeneficiarioEntity();
@@ -47,9 +52,24 @@ public class BeneficiarioService {
                 .orElseThrow(() -> new RuntimeException("Associado não encontrado"));
         beneficiario.setAssociado(associado);
 
-        if (dto.getDependenteId() != null) {
-            DependenteEntity dependente = dependenteRepository.findById(dto.getDependenteId())
-                    .orElseThrow(() -> new RuntimeException("Dependente não encontrado"));
+
+        if (dto.getTitular() == Boolean.TRUE) {
+            boolean titularJaExiste = beneficiarioRepository.existsByAssociadoIdAndTitular(dto.getAssociadoId(), true);
+            if (titularJaExiste) {
+                throw new RuntimeException("Já existe um beneficiário titular para este associado.");
+            }
+        }
+
+        if (dto.getTitular() == Boolean.FALSE) {
+            DependenteEntity dependente;
+
+            if (dto.getDependenteId() == null) {
+                dependente = dependenteService.registerDependenteRetorno(depDto);
+            } else {
+                dependente = dependenteRepository.findById(dto.getDependenteId())
+                        .orElseThrow(() -> new RuntimeException("Dependente não encontrado"));
+            }
+
             beneficiario.setDependente(dependente);
         }
 
