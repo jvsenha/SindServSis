@@ -3,18 +3,23 @@ package br.com.sindservferpa.SindServ.Controller;
 import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
 import br.com.sindservferpa.SindServ.DTO.FuncDTO;
 import br.com.sindservferpa.SindServ.DTO.LoginRequest;
-import br.com.sindservferpa.SindServ.Entity.UserEntity;
+import br.com.sindservferpa.SindServ.DTO.LoginResponse;
 import br.com.sindservferpa.SindServ.Service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
 @RequestMapping("/auth")
-public class authController {
+public class AuthController {
 
     @Autowired
     private AuthService authService;
@@ -26,7 +31,7 @@ public class authController {
     // retorna um ResponseEntity, que é todos os tipos de response http
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            UserEntity user = authService.autenticar(loginRequest.getEmail(), loginRequest.getSenha());
+            LoginResponse user = authService.autenticar(loginRequest);
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(e.getMessage());
@@ -52,5 +57,35 @@ public class authController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PostMapping("/register/assoc/lote")
+    public ResponseEntity<?> cadastrarEmLote(@RequestBody List<AssociadoDTO> dtos) {
+        System.out.println("Quantidade recebida no backend: " + dtos.size());
+        List<String> cadastrados = new ArrayList<>();
+        List<String> ignorados = new ArrayList<>();
+
+        for (AssociadoDTO dto : dtos) {
+            try {
+                boolean criado = authService.registerAssocIfNotExists(dto);
+                if (criado) {
+                    cadastrados.add(dto.getEmail());
+                } else {
+                    ignorados.add(dto.getEmail());
+                }
+            } catch (Exception e) {
+                // Registra erro individual
+                ignorados.add(dto.getEmail() + " (erro: " + e.getMessage() + ")");
+                System.out.println("Erro ao cadastrar: " + dto.getEmail() + " -> " + e.getMessage());
+            }
+        }
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("totalRecebidos", dtos.size());
+        resposta.put("cadastrados", cadastrados);
+        resposta.put("ignorados", ignorados);
+
+        return ResponseEntity.ok(resposta);
+    }
+
 
 }

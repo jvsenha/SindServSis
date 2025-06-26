@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.br.CPF;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +33,6 @@ public class AssociadoEntity extends UserEntity {
     @NotBlank
     private String cpf;
 
-    @Column(name = "Vinculo", nullable = false)
-    @NotBlank
-    private String vinculo;
-
     @Column(name = "rg", unique = true, nullable = false)
     @NotBlank
     private String rg;
@@ -43,6 +41,9 @@ public class AssociadoEntity extends UserEntity {
     @Valid
     private EnderecoEmbeddable endereco;
 
+    @Column(name = "Data", nullable = false)
+    @NotNull(message = "A data não pode ser nula")
+    private LocalDate data;
 
     @Column(name = "estadoCivil", nullable = false)
     @NotBlank

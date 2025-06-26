@@ -1,15 +1,13 @@
 package br.com.sindservferpa.SindServ.Service;
 
-import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
-import br.com.sindservferpa.SindServ.DTO.DepDTO;
-import br.com.sindservferpa.SindServ.DTO.EnderecoDTO;
-import br.com.sindservferpa.SindServ.DTO.FuncDTO;
+import br.com.sindservferpa.SindServ.DTO.*;
 import br.com.sindservferpa.SindServ.Entity.*;
 import br.com.sindservferpa.SindServ.Enum.Role;
 import br.com.sindservferpa.SindServ.Enum.Status;
 import br.com.sindservferpa.SindServ.Repository.AssocRepository;
 import br.com.sindservferpa.SindServ.Repository.FuncRepository;
 import br.com.sindservferpa.SindServ.Repository.UserRepository;
+import br.com.sindservferpa.SindServ.Util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,16 +27,24 @@ public class AuthService {
     public AssocRepository assocRepository;
     @Autowired
     public PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    public UserEntity autenticar(String email, String senha) {
-        UserEntity user = userRepository.findByEmail(email)
+    public LoginResponse autenticar(LoginRequest loginRequest) {
+        UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        if (!passwordEncoder.matches(senha, user.getSenha())) {
+        if (!passwordEncoder.matches(loginRequest.getSenha(), user.getSenha())) {
             throw new RuntimeException("Senha inválida");
         }
 
-        return user;
+        if (user.getStatus() != Status.STATUS_ATIVO) {
+            throw new RuntimeException("Usuário inativo");
+        }
+
+        String token = jwtUtil.generateToken(user);
+
+        return new LoginResponse( token, user.getEmail(), user.getNome(), user.getRole().name(), user.getId());
     }
 
     public void RegisterFunc(FuncDTO dto){
@@ -94,7 +100,7 @@ public class AuthService {
         //atributos Func
         Assoc.setMatricula(dto.getMatricula());
         Assoc.setCpf(dto.getCpf());
-        Assoc.setVinculo(dto.getVinculo());
+        Assoc.setData(dto.getData());
         Assoc.setRg(dto.getRg());
         Assoc.setEndereco(end);
         Assoc.setEstadoCivil(dto.getEstadoCivil());
@@ -123,5 +129,65 @@ public class AuthService {
 
         assocRepository.save(Assoc);
 
+    }
+
+    public boolean registerAssocIfNotExists(AssociadoDTO dto) {
+        if (assocRepository.existsByEmail(dto.getEmail())) {
+            System.out.println("Email já existe: " + dto.getEmail());
+            return false;
+        }
+
+        AssociadoEntity assoc = new AssociadoEntity();
+
+        // Dados comuns
+        assoc.setNome(dto.getNome());
+        assoc.setEmail(dto.getEmail());
+        assoc.setSenha(passwordEncoder.encode(dto.getSenha()));
+        assoc.setStatus(Status.STATUS_ATIVO);
+        assoc.setRole(Role.ROLE_ASC);
+        assoc.setTelefone(dto.getTelefone());
+
+        // Endereço
+        EnderecoDTO endDto = dto.getEndereco();
+        EnderecoEmbeddable endereco = new EnderecoEmbeddable();
+        endereco.setRua(endDto.getRua());
+        endereco.setNumero(endDto.getNumero());
+        endereco.setComplemento(endDto.getComplemento());
+        endereco.setBairro(endDto.getBairro());
+        endereco.setCidade(endDto.getCidade());
+        endereco.setEstado(endDto.getEstado());
+        endereco.setCep(endDto.getCep());
+        assoc.setEndereco(endereco);
+
+        // Dados pessoais
+        assoc.setMatricula(dto.getMatricula());
+        assoc.setCpf(dto.getCpf());
+        assoc.setData(dto.getData());
+        assoc.setRg(dto.getRg());
+        assoc.setEstadoCivil(dto.getEstadoCivil());
+        assoc.setConjugue(dto.getConjugue());
+        assoc.setNomeDoPai(dto.getNomeDoPai());
+        assoc.setNomeDaMae(dto.getNomeDaMae());
+        assoc.setEscolaridade(dto.getEscolaridade());
+        assoc.setLocalDeTrabalho(dto.getLocalDeTrabalho());
+        assoc.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
+        assoc.setCargo(dto.getCargo());
+
+        // Dependentes
+        List<DependenteEntity> dependentes = new ArrayList<>();
+        if (dto.getDependentes() != null) {
+            for (DepDTO depDto : dto.getDependentes()) {
+                DependenteEntity dep = new DependenteEntity();
+                dep.setNome(depDto.getNome());
+                dep.setParentesco(depDto.getParentesco());
+                dep.setAssociado(assoc); // relação reversa
+                dependentes.add(dep);
+            }
+        }
+
+        assoc.setDependentes(dependentes);
+
+        assocRepository.save(assoc);
+        return true;
     }
 }
