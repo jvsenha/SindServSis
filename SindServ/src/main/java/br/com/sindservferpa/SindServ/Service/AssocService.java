@@ -1,13 +1,13 @@
 package br.com.sindservferpa.SindServ.Service;
 
 import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
-import br.com.sindservferpa.SindServ.DTO.DepDTO;
 import br.com.sindservferpa.SindServ.DTO.EnderecoDTO;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Entity.BeneficiarioEntity;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Entity.EnderecoEmbeddable;
 import br.com.sindservferpa.SindServ.Enum.Status;
+import br.com.sindservferpa.SindServ.Mapper.Mapper;
 import br.com.sindservferpa.SindServ.Repository.AssocRepository;
 import br.com.sindservferpa.SindServ.Repository.BeneficiarioRepository;
 import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
@@ -17,9 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AssocService {
@@ -38,6 +38,9 @@ public class AssocService {
 
     @Autowired
     public BeneficiarioRepository beneficiarioRepository;
+
+    @Autowired
+    private Mapper Mapper;
 
     @Transactional
     public HashMap<String, String> deletarAssociado(Long id) {
@@ -65,18 +68,23 @@ public class AssocService {
                 .orElseThrow(() -> new RuntimeException("Associado não encontrado."));
     }
 
-    public List<AssociadoEntity> listarAssoc(){
-        return assocRepository.findAll();
+    public List<AssociadoDTO> listarAssoc() {
+
+        List<AssociadoEntity> lista = assocRepository.findAll();
+
+        return lista.stream()
+                .map(Mapper::toAssocDTO)
+                .collect(Collectors.toList());
     }
 
-    public HashMap<String, String> alterarStatus(Long id){
+    public HashMap<String, String> alterarStatus(Long id) {
         HashMap<String, String> response = new HashMap<>();
 
         AssociadoEntity associado = BuscarAssoc(id);
 
-        if(associado.getStatus() == Status.STATUS_ATIVO){
+        if (associado.getStatus() == Status.STATUS_ATIVO) {
             associado.setStatus(Status.STATUS_INATIVO);
-        }else{
+        } else {
             associado.setStatus(Status.STATUS_ATIVO);
         }
 
@@ -87,7 +95,7 @@ public class AssocService {
     }
 
     @Transactional
-    public HashMap<String, String> alterarAssociado(Long id, AssociadoDTO dto){
+    public HashMap<String, String> alterarAssociado(Long id, AssociadoDTO dto) {
         HashMap<String, String> response = new HashMap<>();
 
         AssociadoEntity associado = BuscarAssoc(id); // nome com inicial minúscula por padrão
@@ -127,23 +135,6 @@ public class AssocService {
         associado.setLocalDeTrabalho(dto.getLocalDeTrabalho());
         associado.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
         associado.setCargo(dto.getCargo());
-
-        if (associado.getDependentes() != null) {
-            associado.getDependentes().clear();
-        } else {
-            associado.setDependentes(new ArrayList<>());
-        }
-
-        if (dto.getDependentes() != null) {
-            for (DepDTO depDto : dto.getDependentes()) {
-                DependenteEntity dep = new DependenteEntity();
-                dep.setNome(depDto.getNome());
-                dep.setParentesco(depDto.getParentesco());
-                dep.setAssociado(associado);
-                associado.getDependentes().add(dep); // adiciona à lista original
-            }
-        }
-
         // Salva tudo
         assocRepository.save(associado);
 

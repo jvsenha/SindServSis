@@ -1,7 +1,11 @@
 package br.com.sindservferpa.SindServ.DTO;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class EnderecoDTO {
     private String rua;

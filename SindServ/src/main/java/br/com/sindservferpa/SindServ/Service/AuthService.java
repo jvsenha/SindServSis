@@ -4,6 +4,7 @@
     import br.com.sindservferpa.SindServ.Entity.*;
     import br.com.sindservferpa.SindServ.Enum.Role;
     import br.com.sindservferpa.SindServ.Enum.Status;
+    import br.com.sindservferpa.SindServ.Mapper.Mapper;
     import br.com.sindservferpa.SindServ.Repository.AssocRepository;
     import br.com.sindservferpa.SindServ.Repository.FuncRepository;
     import br.com.sindservferpa.SindServ.Repository.UserRepository;
@@ -29,6 +30,9 @@
         public PasswordEncoder passwordEncoder;
         @Autowired
         private JwtUtil jwtUtil;
+        @Autowired
+        private Mapper Mapper;
+
 
         public LoginResponse autenticar(LoginRequest loginRequest) {
             UserEntity user = userRepository.findByEmail(loginRequest.getEmail())
@@ -70,7 +74,7 @@
 
         }
 
-        public AssociadoEntity RegisterAssoc(AssociadoDTO dto) {
+        public AssociadoDTO RegisterAssoc(AssociadoDTO dto) {
             if (assocRepository.existsByEmail(dto.getEmail())) {
                 throw new RuntimeException("Email já está cadastrado");
             }
@@ -110,6 +114,7 @@
             Assoc.setLocalDeTrabalho(dto.getLocalDeTrabalho());
             Assoc.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
             Assoc.setCargo(dto.getCargo());
+            Assoc.setPlano(dto.getPlano());
 
             // Dependentes
             List<DependenteEntity> dependentes = new ArrayList<>();
@@ -129,7 +134,7 @@
             // Persiste no banco (com dependentes, se estiver usando cascade)
             Assoc = assocRepository.save(Assoc); // salva e atualiza com id gerado
 
-            return Assoc;
+            return Mapper.toAssocDTO(Assoc);
         }
 
         public boolean registerAssocIfNotExists(AssociadoDTO dto) {

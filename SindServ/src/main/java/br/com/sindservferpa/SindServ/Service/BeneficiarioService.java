@@ -3,11 +3,13 @@ package br.com.sindservferpa.SindServ.Service;
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioDTO;
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioResponseDTO;
 import br.com.sindservferpa.SindServ.DTO.DepDTO;
+import br.com.sindservferpa.SindServ.DTO.DetalhesBeneficiarioDTO;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Entity.BeneficiarioEntity;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Entity.PlanosSaudeEntity;
 import br.com.sindservferpa.SindServ.Enum.Status;
+import br.com.sindservferpa.SindServ.Mapper.Mapper;
 import br.com.sindservferpa.SindServ.Repository.AssocRepository;
 import br.com.sindservferpa.SindServ.Repository.BeneficiarioRepository;
 import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
@@ -96,22 +98,7 @@ public class BeneficiarioService {
 
     public List<BeneficiarioResponseDTO> listarBeneficiario() {
         List<BeneficiarioEntity> beneficiarios = beneficiarioRepository.findAll();
-
-        return beneficiarios.stream().map(b -> {
-            BeneficiarioResponseDTO dto = new BeneficiarioResponseDTO();
-            dto.setId(b.getId());
-            dto.setDataInicio(b.getDataInicio());
-            dto.setTitular(b.getTitular());
-            dto.setNomePlano(b.getPlano().getNome());
-            dto.setNomeAssociado(b.getAssociado().getNome());
-            dto.setStatus(b.getStatus().name());
-
-            if (b.getDependente() != null) {
-                dto.setNomeDependente(b.getDependente().getNome());
-            }
-
-            return dto;
-        }).toList();
+        return beneficiarios.stream().map( b-> Mapper.toBeneficiarioRespondeDTO(b)).toList();
     }
 
     public HashMap<String, String> alterarStatus(Long id) {
@@ -154,5 +141,14 @@ public class BeneficiarioService {
         beneficiarioRepository.save(beneficiario);
         response.put("mensagem", "Beneficiário alterado com sucesso!");
         return response;
+    }
+
+    public DetalhesBeneficiarioDTO detalhesBeneficiario(Long id) {
+        BeneficiarioEntity beneficiario =  beneficiarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Beneficiário não encontrado."));
+
+        DetalhesBeneficiarioDTO detalhes= new DetalhesBeneficiarioDTO();
+
+        return detalhes;
     }
 }

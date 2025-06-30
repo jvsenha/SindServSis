@@ -6,8 +6,10 @@ import br.com.sindservferpa.SindServ.DTO.PlanosSaudeDTO;
 import br.com.sindservferpa.SindServ.Entity.PlanosSaudeEntity;
 import br.com.sindservferpa.SindServ.Enum.Role;
 import br.com.sindservferpa.SindServ.Service.PlanosSaudeService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -15,13 +17,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/planos")
+@Validated
 public class PlanosConstroller {
 
     @Autowired
     public  PlanosSaudeService planosSaudeService;
 
-    @PostMapping("/register/plano")
-    public ResponseEntity<?> registerPlano(@RequestBody PlanosSaudeDTO dto) {
+    @PostMapping("/register")
+    public ResponseEntity<?> registerPlano(@Valid @RequestBody PlanosSaudeDTO dto) {
         try {
             planosSaudeService.registerPlano(dto);
             return ResponseEntity.ok(dto);
@@ -31,7 +34,7 @@ public class PlanosConstroller {
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
-    @DeleteMapping("/deletePlano/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> Delete(@PathVariable Long id){
         HashMap<String, String> response = planosSaudeService.deletarPlanosSaude(id);
         return ResponseEntity.ok(response);
@@ -54,9 +57,10 @@ public class PlanosConstroller {
         HashMap<String, String> response = planosSaudeService.alterarStatus(id);
         return ResponseEntity.ok(response);
     }
+
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
-    @PutMapping("/alterarPlano/{id}")
-    public ResponseEntity<?> alterarPlano(@PathVariable Long id, @RequestBody PlanosSaudeDTO dto){
+    @PutMapping("/alterar/{id}")
+    public ResponseEntity<?> alterarPlano(@PathVariable Long id, @Valid @RequestBody PlanosSaudeDTO dto){
         HashMap<String, String> response = planosSaudeService.alterarPlano(id, dto);
         return ResponseEntity.ok(response);
     }

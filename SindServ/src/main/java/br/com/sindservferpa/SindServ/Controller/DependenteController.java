@@ -5,8 +5,10 @@ import br.com.sindservferpa.SindServ.DTO.DepDTO;
 import br.com.sindservferpa.SindServ.DTO.DependenteResponseDTO;
 import br.com.sindservferpa.SindServ.Enum.Role;
 import br.com.sindservferpa.SindServ.Service.DependenteService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -15,13 +17,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/dependente")
+@Validated
 public class DependenteController {
 
     @Autowired
     public DependenteService dependenteService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerDependente(@RequestBody DepDTO dto) {
+    public ResponseEntity<?> registerDependente( @Valid @RequestBody DepDTO dto) {
         try {
             dependenteService.registerDependente(dto);
             return ResponseEntity.ok(Map.of("mensagem", "Dependente cadastrado com sucesso"));
@@ -31,7 +34,7 @@ public class DependenteController {
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
-    @DeleteMapping("/deleteDependente/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> Delete(@PathVariable Long id){
         HashMap<String, String> response = dependenteService.deletarDependente(id);
         return ResponseEntity.ok(response);
@@ -57,8 +60,8 @@ public class DependenteController {
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
-    @PutMapping("/alterarDependente/{id}")
-    public ResponseEntity<?> alterarDependente(@PathVariable Long id, @RequestBody DepDTO dto){
+    @PutMapping("/alterar/{id}")
+    public ResponseEntity<?> alterarDependente(@PathVariable Long id, @Valid @RequestBody DepDTO dto){
         HashMap<String, String> response = dependenteService.alterarDependente(id, dto);
         return ResponseEntity.ok(response);
     }

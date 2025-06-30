@@ -1,29 +1,43 @@
 package br.com.sindservferpa.SindServ.Service;
 
-import br.com.sindservferpa.SindServ.DTO.BeneficiarioComDependenteDTO;
-import br.com.sindservferpa.SindServ.DTO.BeneficiarioDTO;
-import br.com.sindservferpa.SindServ.DTO.DepDTO;
-import br.com.sindservferpa.SindServ.DTO.RegistroAssociadoCompletoDTO;
+import br.com.sindservferpa.SindServ.DTO.*;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
+import br.com.sindservferpa.SindServ.Repository.AssocRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class CadastroAssociadoService {
 
     @Autowired
     private AuthService authService;
-    @Autowired private BeneficiarioService beneficiarioService;
+
+    @Autowired
+    private BeneficiarioService beneficiarioService;
+
+    @Autowired
+    private AssocRepository assocRepository;
 
     @Transactional
-    public AssociadoEntity cadastrarTudo(RegistroAssociadoCompletoDTO dto) {
-        // 1. Cadastra o associado e dependentes
-        AssociadoEntity assoc = authService.RegisterAssoc(dto.getAssociado());
+    public AssociadoDTO cadastrarTudo(RegistroAssociadoCompletoDTO dto) {
+        // 1. Salvar associado e dependentes
+        AssociadoDTO assoc = authService.RegisterAssoc(dto.getAssociado());
 
-        // 2. Se tiver plano, cadastrar beneficiários
+        assoc.getDependentes().forEach(d -> d.setAssociadoId(assoc.getId()));
+
+        // 2. Se houver plano e beneficiários
         if (Boolean.TRUE.equals(dto.getAssociado().getPlano()) && dto.getBeneficiariosComDependentes() != null) {
+
+            AssociadoEntity associadoSalvo = assocRepository.findById(assoc.getId())
+                    .orElseThrow(() -> new RuntimeException("Associado salvo não encontrado"));
+
+            List<DependenteEntity> dependentesSalvos = associadoSalvo.getDependentes();
+            int dependenteIdx = 0;
+
             for (BeneficiarioComDependenteDTO dados : dto.getBeneficiariosComDependentes()) {
                 BeneficiarioDTO b = dados.getBeneficiario();
                 b.setAssociadoId(assoc.getId());
@@ -33,12 +47,12 @@ public class CadastroAssociadoService {
                     b.setDependenteId(null);
                     beneficiarioService.registerBeneficiario(b, null);
                 } else {
-                    // Procurar dependente pelo nome
-                    DependenteEntity dep = assoc.getDependentes().stream()
-                            .filter(d -> d.getNome().equalsIgnoreCase(dados.getNomeDependente()))
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException("Dependente não encontrado: " + dados.getNomeDependente()));
+                    // Pega dependente correspondente pela ordem
+                    if (dependenteIdx >= dependentesSalvos.size()) {
+                        throw new RuntimeException("Número de beneficiários não titulares maior que o de dependentes");
+                    }
 
+                    DependenteEntity dep = dependentesSalvos.get(dependenteIdx++);
                     b.setDependenteId(dep.getId());
                     beneficiarioService.registerBeneficiario(b, convertDepToDepDTO(dep));
                 }
@@ -49,11 +63,6 @@ public class CadastroAssociadoService {
     }
 
     private DepDTO convertDepToDepDTO(DependenteEntity dep) {
-        DepDTO dto = new DepDTO();
-        dto.setNome(dep.getNome());
-        dto.setParentesco(dep.getParentesco());
-        dto.setData(dep.getData());
-        dto.setAssociadoId(dep.getAssociado().getId());
-        return dto;
+        return new DepDTO(dep.getAssociado().getId(), dep.getNome(), dep.getParentesco(), dep.getData());
     }
 }

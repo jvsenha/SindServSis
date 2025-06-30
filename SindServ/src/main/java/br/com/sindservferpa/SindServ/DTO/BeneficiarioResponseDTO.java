@@ -15,4 +15,5 @@ public class BeneficiarioResponseDTO {
     private String nomeAssociado;
     private String nomeDependente;
     private String status;
+
 }

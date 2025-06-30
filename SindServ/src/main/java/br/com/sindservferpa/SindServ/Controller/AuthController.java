@@ -1,13 +1,15 @@
 package br.com.sindservferpa.SindServ.Controller;
 
 import br.com.sindservferpa.SindServ.DTO.*;
-import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
+import br.com.sindservferpa.SindServ.Response.ApiResponse;
 import br.com.sindservferpa.SindServ.Service.AuthService;
 import br.com.sindservferpa.SindServ.Service.BeneficiarioService;
 import br.com.sindservferpa.SindServ.Service.CadastroAssociadoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@Validated
 public class AuthController {
 
     @Autowired
@@ -35,40 +38,47 @@ public class AuthController {
     public CadastroAssociadoService cadastroAssociadoService;
 
     @PostMapping("/login")// rota para login
-    //Função de login recebe o email e a senha que vem do DTO de login
-    // instancia um usuario e passa os paramentros para autenticar na service de Autenticação
-    // retorna um ResponseEntity, que é todos os tipos de response http
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<?>> login(@RequestBody LoginRequest loginRequest) {
+        HashMap<String, String> result = new HashMap<>();
         try {
             LoginResponse user = authService.autenticar(loginRequest);
-            return ResponseEntity.ok(user);
+
+            result.put("token", user.getToken());
+            ApiResponse<?> response = new ApiResponse<>(true, "Login realizado com sucesso", result);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(401).body(e.getMessage());
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao Logar", e.getMessage());
+            return ResponseEntity.status(400).body(erro);
         }
     }
 
     @PostMapping("/register/func")
-    public ResponseEntity<?> registerFunc(@RequestBody FuncDTO dto) {
+    public ResponseEntity<ApiResponse<?>> registerFunc(@Valid @RequestBody FuncDTO dto) {
         try {
             authService.RegisterFunc(dto);
-            return ResponseEntity.ok(dto);
+            ApiResponse<?> response = new ApiResponse<>(true, "Cadastro Realizado com Sucesso", dto);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao cadastrar", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
         }
     }
 
     @PostMapping("/register/assoc")
-    public ResponseEntity<?> registerAssoc(@RequestBody RegistroAssociadoCompletoDTO dto) {
+    public ResponseEntity<ApiResponse<?>> registerAssoc(@Valid @RequestBody RegistroAssociadoCompletoDTO dto) {
         try {
-            AssociadoEntity assoc = cadastroAssociadoService.cadastrarTudo(dto);
-            return ResponseEntity.ok(assoc);
+            AssociadoDTO assoc = cadastroAssociadoService.cadastrarTudo(dto);
+            ApiResponse<AssociadoDTO> response = new ApiResponse<>(true, "Cadastro Realizado com Sucesso", assoc);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body("Erro: " + e.getMessage());
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao cadastrar", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
         }
     }
 
+
     @PostMapping("/register/assoc/lote")
-    public ResponseEntity<?> cadastrarEmLote(@RequestBody List<AssociadoDTO> dtos) {
+    public ResponseEntity<?> cadastrarEmLote(@Valid @RequestBody List<AssociadoDTO> dtos) {
         System.out.println("Quantidade recebida no backend: " + dtos.size());
         List<String> cadastrados = new ArrayList<>();
         List<String> ignorados = new ArrayList<>();

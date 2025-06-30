@@ -8,8 +8,10 @@ import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Enum.Role;
 import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
 import br.com.sindservferpa.SindServ.Service.BeneficiarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -17,24 +19,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/beneficiario")
+@Validated
 public class BeneficiarioController {
 
     @Autowired
     public BeneficiarioService beneficiarioService;
-@Autowired
+    @Autowired
     public DependenteRepository dependenteRepository;
 
 
-    @PostMapping("/register/beneficiario")
-    public ResponseEntity<?> registerBeneficiario(@RequestBody BeneficiarioComDependenteDTO dados) {
+    @PostMapping("/register")
+    public ResponseEntity<?> registerBeneficiario(@Valid @RequestBody BeneficiarioComDependenteDTO dados) {
         try {
             Long associadoId = dados.getBeneficiario().getAssociadoId();
             String nome = dados.getNomeDependente();
 
-            if(dados.getNomeDependente()!= null) {
+            if (dados.getNomeDependente() != null) {
                 DependenteEntity dependente = dependenteRepository.findByNomeAndAssociadoId(nome, associadoId)
                         .orElseThrow(() -> new RuntimeException("Dependente não encontrado"));
-            dados.getBeneficiario().setDependenteId(dependente.getId());
+                dados.getBeneficiario().setDependenteId(dependente.getId());
             }
 
             beneficiarioService.registerBeneficiario(dados.getBeneficiario(), null); // null pois já existe
@@ -46,8 +49,8 @@ public class BeneficiarioController {
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
-    @DeleteMapping("/deleteBeneficiario/{id}")
-    public ResponseEntity<?> Delete(@PathVariable Long id){
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> Delete(@PathVariable Long id) {
         HashMap<String, String> response = beneficiarioService.deletarBeneficiario(id);
         return ResponseEntity.ok(response);
     }
@@ -66,14 +69,14 @@ public class BeneficiarioController {
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @GetMapping("/alterarStatus/{id}")
-    public ResponseEntity<?> alterar(@PathVariable Long id){
+    public ResponseEntity<?> alterar(@PathVariable Long id) {
         HashMap<String, String> response = beneficiarioService.alterarStatus(id);
         return ResponseEntity.ok(response);
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
-    @PutMapping("/alterarBeneficiario/{id}")
-    public ResponseEntity<?> alterarBeneficiario(@PathVariable Long id, @RequestBody BeneficiarioDTO dto){
+    @PutMapping("/alterar/{id}")
+    public ResponseEntity<?> alterarBeneficiario(@PathVariable Long id, @Valid @RequestBody BeneficiarioDTO dto) {
         HashMap<String, String> response = beneficiarioService.alterarBeneficiario(id, dto);
         return ResponseEntity.ok(response);
     }

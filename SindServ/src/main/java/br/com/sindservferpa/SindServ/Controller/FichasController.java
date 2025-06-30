@@ -6,6 +6,7 @@ import br.com.sindservferpa.SindServ.Enum.Role;
 import br.com.sindservferpa.SindServ.Service.FichasService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/fichas")
+@Validated
 public class FichasController {
 
     @Autowired
