@@ -125,7 +125,7 @@ public class AssocService {
         // Atualiza dados pessoais
         associado.setMatricula(dto.getMatricula());
         associado.setCpf(dto.getCpf());
-        associado.setData(dto.getData());
+        associado.setDataNasc(dto.getDataNasc());
         associado.setRg(dto.getRg());
         associado.setEstadoCivil(dto.getEstadoCivil());
         associado.setConjugue(dto.getConjugue());

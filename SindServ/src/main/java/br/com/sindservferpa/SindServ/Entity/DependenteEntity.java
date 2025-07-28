@@ -31,8 +31,8 @@ public class DependenteEntity {
     private String parentesco;
 
     @Column(name = "Data", nullable = false)
-    @NotNull(message = "A data não pode ser nula")
-    private LocalDate data;
+    @NotNull(message = "A data de nascimento do dependete não pode ser nula")
+    private LocalDate dataNasc;
 
     @ManyToOne
     @JoinColumn(name = "associado_id", nullable = false)

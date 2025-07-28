@@ -54,6 +54,7 @@ public class CadastroAssociadoService {
 
                     DependenteEntity dep = dependentesSalvos.get(dependenteIdx++);
                     b.setDependenteId(dep.getId());
+                    b.setDataNasc(dep.getDataNasc());
                     beneficiarioService.registerBeneficiario(b, convertDepToDepDTO(dep));
                 }
             }
@@ -63,6 +64,6 @@ public class CadastroAssociadoService {
     }
 
     private DepDTO convertDepToDepDTO(DependenteEntity dep) {
-        return new DepDTO(dep.getAssociado().getId(), dep.getNome(), dep.getParentesco(), dep.getData());
+        return new DepDTO(dep.getAssociado().getId(), dep.getNome(), dep.getParentesco(), dep.getDataNasc());
     }
 }

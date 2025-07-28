@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 @Service
 public class PlanosSaudeService {
@@ -23,9 +22,7 @@ public class PlanosSaudeService {
     @Autowired
     private FaixaEtariaRepository faixaEtariaRepository;
 
-    public HashMap<String, String> registerPlano(PlanosSaudeDTO dto) {
-        HashMap<String, String> response = new HashMap<>();
-
+    public PlanosSaudeEntity registerPlano (PlanosSaudeDTO dto) {
         PlanosSaudeEntity plano = new PlanosSaudeEntity();
 
         plano.setNome(dto.getNome());
@@ -48,24 +45,17 @@ public class PlanosSaudeService {
 
         plano.setFaixasEtarias(faixasEtarias);
         planosSaudeRepository.save(plano);
-
-        response.put("mensagem", "Plano e faixas etárias cadastrados com sucesso.");
-        return response;
+        return plano ;
     }
 
     @Transactional
-    public HashMap<String, String> deletarPlanosSaude(Long id) {
-        HashMap<String, String> response = new HashMap<>();
-        PlanosSaudeEntity plano = BuscarPlano(id);
+    public void deletarPlanosSaude(Long id) {
 
+        PlanosSaudeEntity plano = BuscarPlano(id);
         // Deleta faixas primeiro
         faixaEtariaRepository.deleteAll(plano.getFaixasEtarias());
-
         // Depois deleta o plano
         planosSaudeRepository.deleteById(id);
-
-        response.put("mensagem", "Plano e faixas etárias deletados com sucesso.");
-        return response;
     }
 
     public PlanosSaudeEntity BuscarPlano(Long id) {
@@ -77,9 +67,7 @@ public class PlanosSaudeService {
         return planosSaudeRepository.findAll();
     }
 
-    public HashMap<String, String> alterarStatus(Long id) {
-        HashMap<String, String> response = new HashMap<>();
-
+    public Status alterarStatus(Long id) {
         PlanosSaudeEntity plano = BuscarPlano(id);
 
         if (plano.getStatus() == Status.STATUS_ATIVO) {
@@ -89,12 +77,12 @@ public class PlanosSaudeService {
         }
 
         planosSaudeRepository.save(plano);
-        response.put("mensagem", "Status alterado com sucesso!");
-        return response;
+
+        return plano.getStatus();
     }
+
     @Transactional
-    public HashMap<String, String> alterarPlano(Long id, PlanosSaudeDTO dto) {
-        HashMap<String, String> response = new HashMap<>();
+    public PlanosSaudeEntity alterarPlano(Long id, PlanosSaudeDTO dto) {
         PlanosSaudeEntity plano = BuscarPlano(id);
 
         plano.setNome(dto.getNome());
@@ -118,7 +106,7 @@ public class PlanosSaudeService {
         }
 
         planosSaudeRepository.save(plano);
-        response.put("mensagem", "Plano alterado com sucesso!");
-        return response;
+
+        return plano;
     }
 }

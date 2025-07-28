@@ -103,7 +103,7 @@
             // Atributos do associado
             Assoc.setMatricula(dto.getMatricula());
             Assoc.setCpf(dto.getCpf());
-            Assoc.setData(dto.getData());
+            Assoc.setDataNasc(dto.getDataNasc());
             Assoc.setRg(dto.getRg());
             Assoc.setEndereco(end);
             Assoc.setEstadoCivil(dto.getEstadoCivil());
@@ -123,7 +123,7 @@
                     DependenteEntity dep = new DependenteEntity();
                     dep.setNome(depDto.getNome());
                     dep.setParentesco(depDto.getParentesco());
-                    dep.setData(depDto.getData()); // <-- Adicionado corretamente
+                    dep.setDataNasc(depDto.getDataNasc()); // <-- Adicionado corretamente
                     dep.setAssociado(Assoc); // Define a relação reversa
                     dependentes.add(dep);
                 }
@@ -168,7 +168,7 @@
             // Dados pessoais
             assoc.setMatricula(dto.getMatricula());
             assoc.setCpf(dto.getCpf());
-            assoc.setData(dto.getData());
+            assoc.setDataNasc(dto.getDataNasc());
             assoc.setRg(dto.getRg());
             assoc.setEstadoCivil(dto.getEstadoCivil());
             assoc.setConjugue(dto.getConjugue());

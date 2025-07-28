@@ -4,6 +4,8 @@ import br.com.sindservferpa.SindServ.Annotation.RequireRole;
 import br.com.sindservferpa.SindServ.DTO.DepDTO;
 import br.com.sindservferpa.SindServ.DTO.DependenteResponseDTO;
 import br.com.sindservferpa.SindServ.Enum.Role;
+import br.com.sindservferpa.SindServ.Enum.Status;
+import br.com.sindservferpa.SindServ.Response.ApiResponse;
 import br.com.sindservferpa.SindServ.Service.DependenteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/dependente")
@@ -24,45 +24,46 @@ public class DependenteController {
     public DependenteService dependenteService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerDependente( @Valid @RequestBody DepDTO dto) {
+    public ResponseEntity<ApiResponse<?>> registerDependente(@Valid @RequestBody DepDTO dto) {
         try {
-            dependenteService.registerDependente(dto);
-            return ResponseEntity.ok(Map.of("mensagem", "Dependente cadastrado com sucesso"));
+            DependenteResponseDTO dados = dependenteService.registerDependente(dto);
+            ApiResponse<?> response = new ApiResponse<>(true, "Cadastro Realizado com Sucesso", dados);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao cadastrar", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
         }
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> Delete(@PathVariable Long id){
-        HashMap<String, String> response = dependenteService.deletarDependente(id);
+    public ResponseEntity<?> Delete(@PathVariable Long id) {
+        ApiResponse<?> response = new ApiResponse<>(true, "Dependete deletado com sucesso", null);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/listar")
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
-    public ResponseEntity<?> listar() {
-        try {
-            List<DependenteResponseDTO> lista = dependenteService.listarDependente();
-            return ResponseEntity.ok(lista);
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+    public ResponseEntity<ApiResponse<?>> listar() {
+        List<DependenteResponseDTO> lista = dependenteService.listarDependente();
+        ApiResponse<?> response = new ApiResponse<>(true, "Dependete listados com sucesso", lista);
+        return ResponseEntity.ok(response);
     }
 
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @GetMapping("/alterarStatus/{id}")
-    public ResponseEntity<?> alterar(@PathVariable Long id){
-        HashMap<String, String> response = dependenteService.alterarStatus(id);
+    public ResponseEntity<ApiResponse<?>> alterar(@PathVariable Long id) {
+        Status status = dependenteService.alterarStatus(id);
+        ApiResponse<?> response = new ApiResponse<>(true, "Status altertado com sucesso", status);
         return ResponseEntity.ok(response);
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @PutMapping("/alterar/{id}")
-    public ResponseEntity<?> alterarDependente(@PathVariable Long id, @Valid @RequestBody DepDTO dto){
-        HashMap<String, String> response = dependenteService.alterarDependente(id, dto);
+    public ResponseEntity<ApiResponse<?>> alterarDependente(@PathVariable Long id, @Valid @RequestBody DepDTO dto) {
+        DependenteResponseDTO dependente = dependenteService.alterarDependente(id, dto);
+        ApiResponse<?> response = new ApiResponse<>(true, "Dependente altertado com sucesso", dependente);
         return ResponseEntity.ok(response);
     }
 }

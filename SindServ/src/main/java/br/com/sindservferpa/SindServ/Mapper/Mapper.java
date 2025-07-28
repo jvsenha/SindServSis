@@ -1,18 +1,17 @@
 package br.com.sindservferpa.SindServ.Mapper;
 
-import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
-import br.com.sindservferpa.SindServ.DTO.BeneficiarioResponseDTO;
-import br.com.sindservferpa.SindServ.DTO.DepDTO;
-import br.com.sindservferpa.SindServ.DTO.EnderecoDTO;
+import br.com.sindservferpa.SindServ.DTO.*;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Entity.BeneficiarioEntity;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Entity.EnderecoEmbeddable;
 import br.com.sindservferpa.SindServ.Repository.BeneficiarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
 
+@Component
 public class Mapper {
 
 
@@ -20,7 +19,7 @@ public class Mapper {
     private BeneficiarioRepository beneficiarioRepository;
 
 
-    public  AssociadoDTO toAssocDTO(AssociadoEntity assoc) {
+    public AssociadoDTO toAssocDTO(AssociadoEntity assoc) {
         return new AssociadoDTO(
                 assoc.getId(),
                 assoc.getNome(),
@@ -28,7 +27,7 @@ public class Mapper {
                 assoc.getTelefone(),
                 assoc.getMatricula(),
                 assoc.getCpf(),
-                assoc.getData(),
+                assoc.getDataNasc(),
                 assoc.getRg(),
                 toEnderecoDTO(assoc.getEndereco()),
                 assoc.getEstadoCivil(),
@@ -48,7 +47,7 @@ public class Mapper {
 
     public static BeneficiarioResponseDTO toBeneficiarioRespondeDTO(BeneficiarioEntity beneficiario) {
         BeneficiarioResponseDTO dto = new BeneficiarioResponseDTO();
-
+        dto.setId(beneficiario.getId());
         dto.setDataInicio(beneficiario.getDataInicio());
         dto.setTitular(beneficiario.getTitular());
         dto.setNomePlano(beneficiario.getPlano().getNome());
@@ -58,9 +57,6 @@ public class Mapper {
         if (beneficiario.getDependente() != null) {
             dto.setNomeDependente(beneficiario.getDependente().getNome());
         }
-
-
-
         return dto;
     }
 
@@ -75,9 +71,23 @@ public class Mapper {
                 endereco.getCep()
         );
 
-}
+    }
 
     public static DepDTO toDepDTO(DependenteEntity dep) {
-        return new DepDTO(dep.getAssociado().getId(), dep.getNome(), dep.getParentesco(), dep.getData());
+        return new DepDTO(dep.getAssociado().getId(), dep.getNome(), dep.getParentesco(), dep.getDataNasc());
     }
+
+    public static DependenteResponseDTO toDepResponseDTO(DependenteEntity dep) {
+
+        DependenteResponseDTO responseDTO = new DependenteResponseDTO();
+        responseDTO.setId(dep.getId());
+        responseDTO.setNome(dep.getNome());
+        responseDTO.setNome(dep.getAssociado().getNome());
+        responseDTO.setParentesco(dep.getParentesco());
+        responseDTO.setData(dep.getDataNasc());
+        responseDTO.setStatus(dep.getStatus());
+
+        return responseDTO;
+    }
+
 }

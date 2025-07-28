@@ -4,9 +4,12 @@ import br.com.sindservferpa.SindServ.Annotation.RequireRole;
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioComDependenteDTO;
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioDTO;
 import br.com.sindservferpa.SindServ.DTO.BeneficiarioResponseDTO;
+import br.com.sindservferpa.SindServ.DTO.DetalhesBeneficiarioDTO;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Enum.Role;
+import br.com.sindservferpa.SindServ.Enum.Status;
 import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
+import br.com.sindservferpa.SindServ.Response.ApiResponse;
 import br.com.sindservferpa.SindServ.Service.BeneficiarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -29,7 +31,7 @@ public class BeneficiarioController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerBeneficiario(@Valid @RequestBody BeneficiarioComDependenteDTO dados) {
+    public ResponseEntity<ApiResponse<?>> registerBeneficiario(@Valid @RequestBody BeneficiarioComDependenteDTO dados) {
         try {
             Long associadoId = dados.getBeneficiario().getAssociadoId();
             String nome = dados.getNomeDependente();
@@ -42,43 +44,70 @@ public class BeneficiarioController {
 
             beneficiarioService.registerBeneficiario(dados.getBeneficiario(), null); // null pois já existe
 
-            return ResponseEntity.ok(dados);
+            ApiResponse<?> response = new ApiResponse<>(true, "Cadastro Realizado com Sucesso", dados);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao cadastrar", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
         }
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> Delete(@PathVariable Long id) {
-        HashMap<String, String> response = beneficiarioService.deletarBeneficiario(id);
+    public ResponseEntity<ApiResponse<?>> Delete(@PathVariable Long id) {
+        beneficiarioService.deletarBeneficiario(id);
+        ApiResponse<?> response = new ApiResponse<>(true, "Beneficiario deletado com sucesso", null);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/listar")
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
-    public ResponseEntity<?> listar() {
-        try {
-            List<BeneficiarioResponseDTO> lista = beneficiarioService.listarBeneficiario();
-            return ResponseEntity.ok(lista);
-        } catch (Exception e) {
-            return ResponseEntity.status(400).body(e.getMessage());
-        }
+    public ResponseEntity<ApiResponse<List<BeneficiarioResponseDTO>>> listar() {
+        List<BeneficiarioResponseDTO> lista = beneficiarioService.listarBeneficiario();
+        ApiResponse<List<BeneficiarioResponseDTO>> response =
+                new ApiResponse<>(true, "Beneficiários listados com sucesso", lista);
+        return ResponseEntity.ok(response);
     }
 
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @GetMapping("/alterarStatus/{id}")
-    public ResponseEntity<?> alterar(@PathVariable Long id) {
-        HashMap<String, String> response = beneficiarioService.alterarStatus(id);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<?>> alterar(@PathVariable Long id) {
+        try {
+            Status status = beneficiarioService.alterarStatus(id);
+            ApiResponse<?> response = new ApiResponse<>(true, "Status Alterado com sucesso", status);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao altera status", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
+        }
     }
 
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @PutMapping("/alterar/{id}")
-    public ResponseEntity<?> alterarBeneficiario(@PathVariable Long id, @Valid @RequestBody BeneficiarioDTO dto) {
-        HashMap<String, String> response = beneficiarioService.alterarBeneficiario(id, dto);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<?>> alterarBeneficiario(@PathVariable Long id, @Valid @RequestBody BeneficiarioDTO dto) {
+        try {
+            BeneficiarioResponseDTO result = beneficiarioService.alterarBeneficiario(id, dto);
+            ApiResponse<?> response = new ApiResponse<>(true, "Beneficiario Alterado com sucesso", result);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao Alterar beneficiario", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
+        }
     }
+
+    @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
+    @GetMapping("/detalhes/{id}")
+    public ResponseEntity<ApiResponse<?>> detalhesBeneficiario(@PathVariable Long id) {
+        try {
+            DetalhesBeneficiarioDTO detalhes = beneficiarioService.detalhesBeneficiario(id);
+            ApiResponse<DetalhesBeneficiarioDTO> response = new ApiResponse<>(true, "Detalhes do beneficiário carregados com sucesso", detalhes);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao carregar Detalhes do beneficiário", e.getMessage());
+            return ResponseEntity.status(400).body(erro);
+        }
+    }
+
 
 }

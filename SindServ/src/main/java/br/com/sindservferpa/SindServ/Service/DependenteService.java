@@ -5,9 +5,11 @@ import br.com.sindservferpa.SindServ.DTO.DependenteResponseDTO;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Entity.DependenteEntity;
 import br.com.sindservferpa.SindServ.Enum.Status;
+import br.com.sindservferpa.SindServ.Mapper.Mapper;
 import br.com.sindservferpa.SindServ.Repository.DependenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,33 +23,31 @@ public class DependenteService {
     @Autowired
     public AssocService assocService;
 
-    public HashMap<String, String> registerDependente(DepDTO dto){
-        HashMap<String, String> response = new HashMap<>();
+    public DependenteResponseDTO registerDependente(DepDTO dto){
 
         DependenteEntity dependente = new DependenteEntity();
         AssociadoEntity associado = assocService.BuscarAssoc(dto.getAssociadoId());
 
         dependente.setNome(dto.getNome());
-        dependente.setData(dto.getData());
+        dependente.setDataNasc(dto.getDataNasc());
         dependente.setParentesco(dto.getParentesco());
         dependente.setAssociado(associado);
         dependente.setStatus(Status.STATUS_ATIVO);
 
         dependenteRepository.saveAndFlush(dependente);
 
-        response.put("mensagem", "Dependente cadastrado com sucesso");
-        return response;
+        return Mapper.toDepResponseDTO(dependente);
     }
 
-    public HashMap<String, String> deletarDependente(Long id) {
-        HashMap<String, String> response = new HashMap<>();
-        dependenteRepository.deleteById(id);
-        response.put("mensagem", "Dependente deletado com sucesso");
-        return response;
+    @Transactional
+    public void deletarDependente(Long id) {
+       DependenteEntity dependente =  dependenteRepository.findById(id)
+               .orElseThrow(()-> new RuntimeException("Dependente não encontrado"));
+       dependenteRepository.delete(dependente);
     }
 
-    public HashMap<String, String> alterarStatus(Long id) {
-        HashMap<String, String> response = new HashMap<>();
+    public Status alterarStatus(Long id) {
+
         DependenteEntity dependente = BuscarDependente(id);
 
         if (dependente.getStatus() == Status.STATUS_ATIVO) {
@@ -57,8 +57,8 @@ public class DependenteService {
         }
 
         dependenteRepository.save(dependente);
-        response.put("mensagem", "Status do dependente alterado com sucesso!");
-        return response;
+
+        return dependente.getStatus();
     }
 
     public DependenteEntity BuscarDependente(Long id) {
@@ -72,7 +72,7 @@ public class DependenteService {
         return dependente.stream().map(d -> {
             DependenteResponseDTO dto = new DependenteResponseDTO();
             dto.setId(d.getId());
-            dto.setData(d.getData());
+            dto.setData(d.getDataNasc());
             dto.setNome(d.getNome());
             dto.setNomeAssociado(d.getAssociado().getNome());
             dto.setParentesco(d.getParentesco());
@@ -82,20 +82,19 @@ public class DependenteService {
         }).toList();
     }
 
-    public HashMap<String, String> alterarDependente(Long id, DepDTO dto){
+    public DependenteResponseDTO alterarDependente(Long id, DepDTO dto){
         HashMap<String, String> response = new HashMap<>();
         DependenteEntity dependente = BuscarDependente(id);
         AssociadoEntity associado = assocService.BuscarAssoc(dto.getAssociadoId());
 
         dependente.setNome(dto.getNome());
-        dependente.setData(dto.getData());
+        dependente.setDataNasc(dto.getDataNasc());
         dependente.setParentesco(dto.getParentesco());
         dependente.setAssociado(associado);
 
         dependenteRepository.saveAndFlush(dependente);
 
-        response.put("mensagem", "Dependente alterado com sucesso");
-        return response;
+        return Mapper.toDepResponseDTO(dependente);
     }
 
     public DependenteEntity registerDependenteRetorno(DepDTO dto) {
@@ -104,7 +103,7 @@ public class DependenteService {
         AssociadoEntity associado = assocService.BuscarAssoc(dto.getAssociadoId());
 
         dependente.setNome(dto.getNome());
-        dependente.setData(dto.getData());
+        dependente.setDataNasc(dto.getDataNasc());
         dependente.setParentesco(dto.getParentesco());
         dependente.setAssociado(associado);
         dependente.setStatus(Status.STATUS_ATIVO);

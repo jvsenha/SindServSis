@@ -41,9 +41,9 @@ import java.util.List;
         @Valid
         private EnderecoEmbeddable endereco;
 
-        @Column(name = "Data", nullable = false)
-        @NotNull(message = "A data não pode ser nula")
-        private LocalDate data;
+        @Column(name = "data_nasc", nullable = false)
+        @NotNull(message = "A data de nascimento do associado  não pode ser nula")
+        private LocalDate dataNasc;
 
         @Column(name = "estadoCivil", nullable = false)
         @NotBlank

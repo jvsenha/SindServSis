@@ -21,7 +21,7 @@ public class AssociadoDTO extends UserDTO {
     private String cpf;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    private LocalDate data;
+    private LocalDate dataNasc;
 
     private String rg;
     private EnderecoDTO endereco;

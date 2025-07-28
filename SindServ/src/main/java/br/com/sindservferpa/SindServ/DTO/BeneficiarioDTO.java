@@ -10,6 +10,9 @@ public class BeneficiarioDTO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate dataInicio;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    private LocalDate dataNasc;
     private Boolean titular;
     private Long planoId;
     private Long associadoId;

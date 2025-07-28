@@ -20,9 +20,13 @@ public class BeneficiarioEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "A data de início é obrigatória")
+    @NotNull(message = "A data de inicio do beneficiario é obrigatória")
     @Column(name = "data_inicio", nullable = false)
     private LocalDate dataInicio;
+
+    @NotNull(message = "A data de nascimento do beneficiario é obrigatória")
+    @Column(name = "data_nasc", nullable = false)
+    private LocalDate dataNasc;
 
     @NotNull(message = "O status de titular é obrigatório")
     @Column(name = "titular", nullable = false)

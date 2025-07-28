@@ -15,5 +15,5 @@ public class DepDTO {
     private String nome;
     private String parentesco;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    private LocalDate data;
+    private LocalDate dataNasc;
 }

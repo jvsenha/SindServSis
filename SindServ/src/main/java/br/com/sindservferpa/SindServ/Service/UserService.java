@@ -6,7 +6,6 @@ import br.com.sindservferpa.SindServ.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -15,9 +14,7 @@ public class UserService {
     @Autowired
     public UserRepository userRepository;
 
-    public HashMap<String, String> AlteraStatus(Long id){
-
-        HashMap<String, String> response = new HashMap<>();
+    public Status AlteraStatus(Long id){
 
         UserEntity user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -33,8 +30,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        response.put("mensagem", "Status alterado co sucesso!");
-        return response;
+        return status;
     }
 
     public List<UserEntity> listar() {
