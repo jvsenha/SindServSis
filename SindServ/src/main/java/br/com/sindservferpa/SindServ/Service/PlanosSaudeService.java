@@ -44,7 +44,7 @@ public class PlanosSaudeService {
         }
 
         plano.setFaixasEtarias(faixasEtarias);
-        planosSaudeRepository.save(plano);
+        planosSaudeRepository.saveAndFlush(plano);
         return plano ;
     }
 
@@ -76,7 +76,7 @@ public class PlanosSaudeService {
             plano.setStatus(Status.STATUS_ATIVO);
         }
 
-        planosSaudeRepository.save(plano);
+        planosSaudeRepository.saveAndFlush(plano);
 
         return plano.getStatus();
     }
@@ -105,7 +105,7 @@ public class PlanosSaudeService {
             }
         }
 
-        planosSaudeRepository.save(plano);
+        planosSaudeRepository.saveAndFlush(plano);
 
         return plano;
     }

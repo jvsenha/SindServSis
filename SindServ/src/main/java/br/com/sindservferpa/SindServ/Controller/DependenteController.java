@@ -9,6 +9,7 @@ import br.com.sindservferpa.SindServ.Response.ApiResponse;
 import br.com.sindservferpa.SindServ.Service.DependenteService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -38,8 +39,18 @@ public class DependenteController {
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> Delete(@PathVariable Long id) {
-        ApiResponse<?> response = new ApiResponse<>(true, "Dependete deletado com sucesso", null);
-        return ResponseEntity.ok(response);
+        try {
+            ApiResponse<?> response = new ApiResponse<>(true, "Dependete deletado com sucesso", null);
+            return ResponseEntity.ok(response);
+        } catch (
+                DataIntegrityViolationException ex) {
+            return ResponseEntity.badRequest().body(
+                    new ApiResponse<>(false, "Este Dependete está vinculado a outros dados e não pode ser excluído.", null)
+            );
+        } catch (RuntimeException e) {
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao Deletar", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
+        }
     }
 
     @GetMapping("/listar")

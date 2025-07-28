@@ -70,7 +70,7 @@
             func.setSetor(dto.getSetor());
             func.setTipoContrato(dto.getTipoContrato());
 
-            funcRepository.save(func);
+            funcRepository.saveAndFlush(func);
 
         }
 
@@ -132,7 +132,7 @@
             Assoc.setDependentes(dependentes);
 
             // Persiste no banco (com dependentes, se estiver usando cascade)
-            Assoc = assocRepository.save(Assoc); // salva e atualiza com id gerado
+            Assoc = assocRepository.saveAndFlush(Assoc); // salva e atualiza com id gerado
 
             return Mapper.toAssocDTO(Assoc);
         }
@@ -193,7 +193,7 @@
 
             assoc.setDependentes(dependentes);
 
-            assocRepository.save(assoc);
+            assocRepository.saveAndFlush(assoc);
             return true;
         }
     }

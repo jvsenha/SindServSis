@@ -10,6 +10,7 @@ import br.com.sindservferpa.SindServ.Response.ApiResponse;
 import br.com.sindservferpa.SindServ.Service.PlanosSaudeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -43,8 +44,12 @@ public class PlanosConstroller {
             planosSaudeService.deletarPlanosSaude(id);
             ApiResponse<?> response = new ApiResponse<>(true, "Cadastro Realizado com Sucesso", null);
             return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao cadastrar", e.getMessage());
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.badRequest().body(
+                    new ApiResponse<>(false, "Este plano está vinculado a beneficiários e não pode ser excluído.", null)
+            );
+        }catch (RuntimeException e) {
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao Deletar", e.getMessage());
             return ResponseEntity.badRequest().body(erro);
         }
     }

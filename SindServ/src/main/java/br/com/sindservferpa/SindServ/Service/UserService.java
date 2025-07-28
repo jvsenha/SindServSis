@@ -28,9 +28,9 @@ public class UserService {
             user.setStatus(Status.STATUS_ATIVO);
         }
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
-        return status;
+        return user.getStatus();
     }
 
     public List<UserEntity> listar() {

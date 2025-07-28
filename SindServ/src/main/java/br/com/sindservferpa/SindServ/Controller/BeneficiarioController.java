@@ -13,6 +13,7 @@ import br.com.sindservferpa.SindServ.Response.ApiResponse;
 import br.com.sindservferpa.SindServ.Service.BeneficiarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -55,9 +56,19 @@ public class BeneficiarioController {
     @RequireRole({Role.ROLE_ADMIN, Role.ROLE_FUNC})
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<ApiResponse<?>> Delete(@PathVariable Long id) {
-        beneficiarioService.deletarBeneficiario(id);
-        ApiResponse<?> response = new ApiResponse<>(true, "Beneficiario deletado com sucesso", null);
-        return ResponseEntity.ok(response);
+        try {
+            beneficiarioService.deletarBeneficiario(id);
+            ApiResponse<?> response = new ApiResponse<>(true, "Beneficiario deletado com sucesso", null);
+            return ResponseEntity.ok(response);
+        } catch (
+                DataIntegrityViolationException ex) {
+            return ResponseEntity.badRequest().body(
+                    new ApiResponse<>(false, "Este Beneficiario está vinculado a outros dados e não pode ser excluído.", null)
+            );
+        } catch (RuntimeException e) {
+            ApiResponse<String> erro = new ApiResponse<>(false, "Erro ao Deletar", e.getMessage());
+            return ResponseEntity.badRequest().body(erro);
+        }
     }
 
     @GetMapping("/listar")

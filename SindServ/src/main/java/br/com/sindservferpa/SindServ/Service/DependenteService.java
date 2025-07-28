@@ -56,7 +56,7 @@ public class DependenteService {
             dependente.setStatus(Status.STATUS_ATIVO);
         }
 
-        dependenteRepository.save(dependente);
+        dependenteRepository.saveAndFlush(dependente);
 
         return dependente.getStatus();
     }

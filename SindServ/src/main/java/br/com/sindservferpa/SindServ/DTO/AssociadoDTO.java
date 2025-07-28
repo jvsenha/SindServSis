@@ -17,14 +17,15 @@ public class AssociadoDTO extends UserDTO {
     private String nome;
     private String email;
     private String telefone;
+
     private String matricula;
     private String cpf;
+    private EnderecoDTO endereco;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate dataNasc;
 
     private String rg;
-    private EnderecoDTO endereco;
     private String estadoCivil;
     private String conjugue;
     private String nomeDoPai;

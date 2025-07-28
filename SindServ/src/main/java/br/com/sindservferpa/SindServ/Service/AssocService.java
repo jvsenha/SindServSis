@@ -17,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,9 +42,7 @@ public class AssocService {
     private Mapper Mapper;
 
     @Transactional
-    public HashMap<String, String> deletarAssociado(Long id) {
-        HashMap<String, String> response = new HashMap<>();
-
+    public void deletarAssociado(Long id) {
         AssociadoEntity associado = BuscarAssoc(id); // assume que lança exceção se não encontrar
 
         // 1. Deletar beneficiários associados a esse associado
@@ -58,9 +55,6 @@ public class AssocService {
 
         // 3. Deletar o associado (UserEntity herdado será excluído também, se for o mesmo ID)
         assocRepository.delete(associado);
-
-        response.put("mensagem", "Associado, beneficiários e dependentes deletados com sucesso.");
-        return response;
     }
 
     public AssociadoEntity BuscarAssoc(Long id) {
@@ -77,8 +71,8 @@ public class AssocService {
                 .collect(Collectors.toList());
     }
 
-    public HashMap<String, String> alterarStatus(Long id) {
-        HashMap<String, String> response = new HashMap<>();
+    public Status alterarStatus(Long id) {
+
 
         AssociadoEntity associado = BuscarAssoc(id);
 
@@ -88,15 +82,12 @@ public class AssocService {
             associado.setStatus(Status.STATUS_ATIVO);
         }
 
-        assocRepository.save(associado);
-
-        response.put("mensagem", "Status alterado co sucesso!");
-        return response;
+        assocRepository.saveAndFlush(associado);
+        return associado.getStatus();
     }
 
     @Transactional
-    public HashMap<String, String> alterarAssociado(Long id, AssociadoDTO dto) {
-        HashMap<String, String> response = new HashMap<>();
+    public AssociadoDTO alterarAssociado(Long id, AssociadoDTO dto) {
 
         AssociadoEntity associado = BuscarAssoc(id); // nome com inicial minúscula por padrão
 
@@ -105,10 +96,13 @@ public class AssocService {
         }
 
         // Atualiza dados do associado
+        associado.setId(dto.getId());
         associado.setNome(dto.getNome());
         associado.setEmail(dto.getEmail());
-        associado.setSenha(passwordEncoder.encode(dto.getSenha()));
         associado.setTelefone(dto.getTelefone());
+
+        associado.setMatricula(dto.getMatricula());
+        associado.setCpf(dto.getCpf());
 
         // Atualiza endereço existente (se houver), senão cria novo
         EnderecoDTO endDto = dto.getEndereco();
@@ -123,8 +117,6 @@ public class AssocService {
         associado.setEndereco(end);
 
         // Atualiza dados pessoais
-        associado.setMatricula(dto.getMatricula());
-        associado.setCpf(dto.getCpf());
         associado.setDataNasc(dto.getDataNasc());
         associado.setRg(dto.getRg());
         associado.setEstadoCivil(dto.getEstadoCivil());
@@ -136,10 +128,10 @@ public class AssocService {
         associado.setVinculoDeTrabalho(dto.getVinculoDeTrabalho());
         associado.setCargo(dto.getCargo());
         // Salva tudo
-        assocRepository.save(associado);
+        assocRepository.saveAndFlush(associado);
 
-        response.put("mensagem", "Associado alterado com sucesso!");
-        return response;
+
+        return Mapper.toAssocDTO(associado);
     }
 
 }
