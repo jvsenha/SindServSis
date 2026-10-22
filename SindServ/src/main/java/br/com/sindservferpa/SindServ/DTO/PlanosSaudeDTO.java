@@ -1,5 +1,6 @@
 package br.com.sindservferpa.SindServ.DTO;
 
+import br.com.sindservferpa.SindServ.Entity.OperadoraPlano;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public class PlanosSaudeDTO {
 
     private String nome;
     private Boolean coparticipacao;
-    private String operadora;
+    private OperadoraPlano operadora;
     private String registroANS;
     private List<FaixasEtariasDTO> faixasEtarias;
 
