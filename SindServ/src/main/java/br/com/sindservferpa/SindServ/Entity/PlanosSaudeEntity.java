@@ -28,10 +28,6 @@ public class PlanosSaudeEntity {
     @Column(name = "nome", nullable = false)
     private String nome;
 
-    @NotBlank(message = "Registro ANS é obrigatório")
-    @Column(name = "registro_ans", nullable = false)
-    private String registroANS;
-
     @Column(name = "coparticipacao", nullable = false)
     private Boolean coparticipacao = false;
 

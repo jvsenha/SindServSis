@@ -29,7 +29,6 @@ public class PlanosSaudeService {
         plano.setCoparticipacao(dto.getCoparticipacao());
         plano.setOperadora(dto.getOperadora());
         plano.setStatus(Status.STATUS_ATIVO);
-        plano.setRegistroANS(dto.getRegistroANS());
 
         List<FaixaEtariaEntity> faixasEtarias = new ArrayList<>();
         if (dto.getFaixasEtarias() != null) {
@@ -88,7 +87,6 @@ public class PlanosSaudeService {
         plano.setNome(dto.getNome());
         plano.setCoparticipacao(dto.getCoparticipacao());
         plano.setOperadora(dto.getOperadora());
-        plano.setRegistroANS(dto.getRegistroANS());
 
         // Excluir faixas antigas
         faixaEtariaRepository.deleteAll(plano.getFaixasEtarias());

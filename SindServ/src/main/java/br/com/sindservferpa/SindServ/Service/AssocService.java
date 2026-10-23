@@ -1,6 +1,7 @@
 package br.com.sindservferpa.SindServ.Service;
 
 import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
+import br.com.sindservferpa.SindServ.DTO.AssociadoResponse;
 import br.com.sindservferpa.SindServ.DTO.EnderecoDTO;
 import br.com.sindservferpa.SindServ.Entity.AssociadoEntity;
 import br.com.sindservferpa.SindServ.Entity.BeneficiarioEntity;
@@ -62,12 +63,12 @@ public class AssocService {
                 .orElseThrow(() -> new RuntimeException("Associado não encontrado."));
     }
 
-    public List<AssociadoDTO> listarAssoc() {
+    public List<AssociadoResponse> listarAssoc() {
 
         List<AssociadoEntity> lista = assocRepository.findAll();
 
         return lista.stream()
-                .map(Mapper::toAssocDTO)
+                .map(Mapper::toAssocResponse)
                 .collect(Collectors.toList());
     }
 

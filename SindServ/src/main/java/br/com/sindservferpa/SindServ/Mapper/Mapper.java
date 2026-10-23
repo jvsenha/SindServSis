@@ -44,6 +44,17 @@ public class Mapper {
                 assoc.getPlano()
         );
     }
+    public AssociadoResponse toAssocResponse(AssociadoEntity assoc) {
+        return new AssociadoResponse(
+                assoc.getId(),
+                assoc.getNome(),
+                assoc.getEmail(),
+                assoc.getTelefone(),
+                assoc.getMatricula(),
+                assoc.getCargo(),
+                assoc.getLocalDeTrabalho()
+        );
+    }
 
     public static BeneficiarioResponseDTO toBeneficiarioRespondeDTO(BeneficiarioEntity beneficiario) {
         BeneficiarioResponseDTO dto = new BeneficiarioResponseDTO();

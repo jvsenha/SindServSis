@@ -2,6 +2,7 @@ package br.com.sindservferpa.SindServ.Controller;
 
 import br.com.sindservferpa.SindServ.Annotation.RequireRole;
 import br.com.sindservferpa.SindServ.DTO.AssociadoDTO;
+import br.com.sindservferpa.SindServ.DTO.AssociadoResponse;
 import br.com.sindservferpa.SindServ.Enum.Role;
 import br.com.sindservferpa.SindServ.Enum.Status;
 import br.com.sindservferpa.SindServ.Response.ApiResponse;
@@ -44,7 +45,7 @@ public class AssocController {
     @GetMapping("/listar")
     public ResponseEntity<ApiResponse<?>> listar() {
         try {
-            List<AssociadoDTO> lista = assocService.listarAssoc();
+            List<AssociadoResponse> lista = assocService.listarAssoc();
             ApiResponse<?> response = new ApiResponse<>(true, "Lista de associados carregada com sucesso", lista);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
